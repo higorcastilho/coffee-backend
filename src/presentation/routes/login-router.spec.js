@@ -1,16 +1,32 @@
 const LoginRouter = require('./login-router.js')
 const MissingParamError = require('../helpers/missing-param-error.js')
 const UnauthorizedError = require('../helpers/unauthorized-error.js')
+const InvalidParamError = require('../helpers/invalid-param-error.js')
 const ServerError = require('../helpers/server-error.js')
 
 const makeSut = () => {
   const authUseCaseSpy = makeAuthUseCase()
+  const emailValidatorSpy = makeEmailValidator()
   authUseCaseSpy.accessToken = 'valid_token'
-  const sut = new LoginRouter(authUseCaseSpy)
+  const sut = new LoginRouter(authUseCaseSpy, emailValidatorSpy)
   return {
     sut,
-    authUseCaseSpy
+    authUseCaseSpy,
+    emailValidatorSpy
   }
+}
+
+// makeEmailValidator is also an example of factory
+const makeEmailValidator = () => {
+  class EmailValidatorSpy {
+    isValid (email) {
+      return this.isEmailValid
+    }
+  }
+
+  const emailValidatorSpy = new EmailValidatorSpy()
+  emailValidatorSpy.isEmailValid = true
+  return emailValidatorSpy
 }
 
 const makeAuthUseCase = () => {
@@ -159,5 +175,19 @@ describe('Login Router', () => {
     }
     const httpResponse = await sut.route(httpRequest)
     expect(httpResponse.statusCode).toBe(500)
+  })
+
+  test('Should return 400 if an invalid email is provided', async () => {
+    const { sut, emailValidatorSpy } = makeSut()
+    emailValidatorSpy.isEmailValid = false
+    const httpRequest = {
+      body: {
+        email: 'invalid_email@mail.com',
+        password: 'any_password'
+      }
+    }
+    const httpResponse = await sut.route(httpRequest)
+    expect(httpResponse.statusCode).toBe(400)
+    expect(httpResponse.body).toEqual(new InvalidParamError('email'))
   })
 })
