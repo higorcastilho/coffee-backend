@@ -1,7 +1,7 @@
 module.exports = {
   coverageDirectory: 'coverage',
 
-  coverageProvider: 'v8',
+  coverageProvider: 'babel',
 
   testEnvironment: 'node'
 }
