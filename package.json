@@ -12,7 +12,9 @@
     "test:ci": "npm test -- --coverage"
   },
   "standard": {
-    "env": ["jest"]
+    "env": [
+      "jest"
+    ]
   },
   "keywords": [],
   "author": "",
@@ -28,6 +30,7 @@
     "cors": "^2.8.5",
     "dotenv": "^8.2.0",
     "mongoose": "^5.10.13",
-    "stripe": "^8.121.0"
+    "stripe": "^8.121.0",
+    "validator": "^13.5.1"
   }
 }
