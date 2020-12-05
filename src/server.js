@@ -10,10 +10,12 @@ app.use(express.json())
 dbConnection()
 
 const {
-  stripeRoutes
+  stripeRoutes,
+  customerOrderRoutes
 } = require('./routes/index')
 
 app.use(stripeRoutes)
+app.use(customerOrderRoutes)
 
 app.listen(5000, () => {
   console.log('Server running...')

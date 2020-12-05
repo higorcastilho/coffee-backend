@@ -3,7 +3,7 @@ const stripe = require('stripe')(STRIPE_SECRET_KEY)
 const MY_DOMAIN = 'http://localhost:3000/checkout'
 
 class StripePaymentService {
-  async createOrder (value, quantity, currency = 'brl') {
+  async createOrder (value, quantity, currency = 'brl', orderId) {
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       line_items: [
@@ -20,8 +20,8 @@ class StripePaymentService {
         }
       ],
       mode: 'payment',
-      success_url: `${MY_DOMAIN}?success=true`,
-      cancel_url: `${MY_DOMAIN}?canceled=true`
+      success_url: `${MY_DOMAIN}?success=true&order=${orderId}`,
+      cancel_url: `${MY_DOMAIN}?canceled=true&order=${orderId}`
     })
 
     return session.id

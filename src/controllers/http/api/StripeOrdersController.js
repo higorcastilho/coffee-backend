@@ -2,10 +2,11 @@ const StripePaymentService = require('../../../services/payment/Stripe')
 
 class StripeOrdersController {
   async pay (req, res) {
-    const { value, quantity } = req.body
+    const { value, quantity, orderId } = req.body
+    console.log(orderId)
     const formattedValue = value * 100
     const stripePaymentService = new StripePaymentService()
-    const sessionId = await stripePaymentService.createOrder(formattedValue, quantity, 'brl')
+    const sessionId = await stripePaymentService.createOrder(formattedValue, quantity, 'brl', orderId)
 
     res.json({ id: sessionId })
   }

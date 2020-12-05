@@ -1,8 +1,9 @@
 const mongoose = require('mongoose')
-const { DB_URI } = process.env
+// const { DB_URI } = process.env
 
 const dbConnection = () => {
-  mongoose.connect(DB_URI, {
+  // mongoose.connect(DB_URI, {
+  mongoose.connect('mongodb://localhost:27012', {
     useNewUrlParser: true,
     useUnifiedTopology: true
   }).then(() => {
