@@ -104,6 +104,62 @@ class CustomerOrderController {
       await OrderInfo.findOneAndUpdate(filter, update)
     }
   }
+
+  async salesPerDate (req, res) {
+    const { month, year } = req.query
+
+    console.log(month, year)
+    const sales = await OrderInfo
+      .aggregate(
+        [
+          {
+            $group: {
+              _id: { $dateToString: { format: '%d-%m-%Y', date: '$date' } },
+              totalUnitsSold: {
+                $sum: '$quantity'
+              }
+            }
+          }
+        ],
+
+        function (err, result) {
+          if (err) {
+            res.send(err)
+          } else {
+            return result
+          }
+        }
+      )
+    const salesPerMonth = sales.filter(item => {
+      return item._id.slice(3, 5) === `${month}` && item._id.slice(6, 10) === `${year}`
+    })
+
+    res.json(salesPerMonth)
+  }
+
+  async monthlySales (req, res) {
+    await OrderInfo
+      .aggregate(
+        [
+          {
+            $group: {
+              _id: { $dateToString: { format: '%m-%Y', date: '$date' } },
+              totalUnitsSold: {
+                $sum: '$quantity'
+              }
+            }
+          }
+        ],
+
+        function (err, result) {
+          if (err) {
+            res.send(err)
+          } else {
+            res.json(result)
+          }
+        }
+      )
+  }
 }
 
 module.exports = CustomerOrderController
