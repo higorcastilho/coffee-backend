@@ -30,6 +30,7 @@
     "bcrypt": "^5.0.0",
     "cors": "^2.8.5",
     "dotenv": "^8.2.0",
+    "jsonwebtoken": "^8.5.1",
     "mongoose": "^5.10.13",
     "stripe": "^8.121.0",
     "validator": "^13.5.1"
