@@ -4,4 +4,4 @@ node_modules/
 
 coverage/
 
-**/src/main/config/env.js
+src/main/config/env.js
