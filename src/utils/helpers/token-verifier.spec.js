@@ -22,6 +22,10 @@ class TokenVerifier {
       throw new MissingParamError('token')
     }
 
+    if (!this.secret) {
+      throw new MissingParamError('secret')
+    }
+
     const authorized = jwt.verify(token, this.secret)
     return authorized
   }
@@ -57,5 +61,11 @@ describe('Token Verifier', () => {
     const sut = makeSut()
     const promise = sut.inspector()
     expect(promise).rejects.toThrow(new MissingParamError('token'))
+  })
+
+  test('Should throw if no secret is provided', async () => {
+    const sut = new TokenVerifier()
+    const promise = sut.inspector('any_token')
+    expect(promise).rejects.toThrow(new MissingParamError('secret'))
   })
 })
