@@ -1,22 +1,33 @@
+const jwt = require('jsonwebtoken')
+
 jest.mock('jsonwebtoken', () => ({
-  decoded: true,
-  verify (token) {
+  secret: 'secret',
+  decoded: {},
+  verify (token, secret) {
+    this.secret = secret
     return this.decoded
   }
 }))
 
 class TokenVerifier {
-  async verify (token) {
-    return false
+  async inspector (token) {
+    const authorized = jwt.verify(token, 'secret')
+    return authorized
   }
 }
-
-// const jwt = require('jsonwebtoken')
 
 describe('Token Verifier', () => {
   test('Should return false if JWT returns false', async () => {
     const sut = new TokenVerifier()
-    const decoded = await sut.verify('any_token')
-    expect(decoded).toBeFalsy()
+    jwt.decoded = false
+    const authorized = await sut.inspector('any_token')
+    expect(authorized).toBeFalsy()
+  })
+
+  test('Should return authorized if JWT returns a authorized', async () => {
+    const sut = new TokenVerifier()
+    jwt.verify('any_token', 'secret')
+    const authorized = await sut.inspector('any_token')
+    expect(authorized).toEqual(jwt.decoded)
   })
 })
