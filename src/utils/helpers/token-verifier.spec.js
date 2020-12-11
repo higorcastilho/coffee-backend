@@ -12,14 +12,18 @@ jest.mock('jsonwebtoken', () => ({
 }))
 
 class TokenVerifier {
+  constructor (secret) {
+    this.secret = secret
+  }
+
   async inspector (token) {
-    const authorized = jwt.verify(token, 'secret')
+    const authorized = jwt.verify(token, this.secret)
     return authorized
   }
 }
 
 const makeSut = () => {
-  return new TokenVerifier()
+  return new TokenVerifier('secret')
 }
 
 describe('Token Verifier', () => {
@@ -32,7 +36,7 @@ describe('Token Verifier', () => {
 
   test('Should return authorized if JWT returns a authorized', async () => {
     const sut = makeSut()
-    jwt.verify('any_token', 'secret')
+    jwt.verify('any_token')
     const authorized = await sut.inspector('any_token')
     expect(authorized).toEqual(jwt.decoded)
   })
@@ -41,5 +45,6 @@ describe('Token Verifier', () => {
     const sut = makeSut()
     await sut.inspector('any_token')
     expect(jwt.token).toBe('any_token')
+    expect(jwt.secret).toBe(sut.secret)
   })
 })
