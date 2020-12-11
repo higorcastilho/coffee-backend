@@ -2,8 +2,10 @@ const jwt = require('jsonwebtoken')
 
 jest.mock('jsonwebtoken', () => ({
   secret: 'secret',
+  token: '',
   decoded: {},
   verify (token, secret) {
+    this.token = token
     this.secret = secret
     return this.decoded
   }
@@ -33,5 +35,11 @@ describe('Token Verifier', () => {
     jwt.verify('any_token', 'secret')
     const authorized = await sut.inspector('any_token')
     expect(authorized).toEqual(jwt.decoded)
+  })
+
+  test('Should call JWT with correct values', async () => {
+    const sut = makeSut()
+    await sut.inspector('any_token')
+    expect(jwt.token).toBe('any_token')
   })
 })
