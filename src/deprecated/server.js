@@ -16,7 +16,7 @@ const {
 
 app.use(stripeRoutes)
 app.use(customerOrderRoutes)
-console.log(process.env)
+
 app.listen(5000, () => {
   console.log('Server running...')
 })
