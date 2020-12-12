@@ -9,6 +9,10 @@ class StripeUseCase {
     if (!quantity) {
       throw new MissingParamError('quantity')
     }
+
+    if (!orderId) {
+      throw new MissingParamError('orderId')
+    }
   }
 }
 
@@ -27,5 +31,11 @@ describe('Stripe Usecase', () => {
     const sut = makeSut()
     const promise = sut.pay('any_value')
     expect(promise).rejects.toThrow(new MissingParamError('quantity'))
+  })
+
+  test('Should throw if no orderId is provided', async () => {
+    const sut = makeSut()
+    const promise = sut.pay('any_value', 'any_quantity')
+    expect(promise).rejects.toThrow(new MissingParamError('orderId'))
   })
 })
