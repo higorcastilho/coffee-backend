@@ -107,6 +107,15 @@ describe('Stripe Usecase', () => {
     expect(sessionId).toBeTruthy()
   })
 
+  test('Should throw if invalid dependecies are provided', async () => {
+    const invalidDependency = {}
+    const sut = new StripeUseCase({
+      stripeService: invalidDependency
+    })
+    const promise = sut.pay('any_value', 'any_quantity', 'any_currency', 'any_orderId')
+    expect(promise).rejects.toThrow()
+  })
+
   test('Should throw if any dependency throws', async () => {
     const sut = new StripeUseCase({
       stripeService: makeStripeServiceWithError()
