@@ -21,10 +21,6 @@ module.exports = class StripeUseCase {
       throw new MissingParamError('orderId')
     }
 
-    if (!this.stripeService) {
-      throw new MissingParamError('stripeService')
-    }
-
     const sessionId = await this.stripeService.createOrder(value, quantity, currency, orderId)
     return sessionId
   }
