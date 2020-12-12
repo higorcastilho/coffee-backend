@@ -22,21 +22,24 @@ class StripeUseCase {
       throw new MissingParamError('orderId')
     }
 
-    await this.stripeService.createOrder(value, quantity, currency, orderId)
-  }
-}
-
-class StripeServiceSpy {
-  async createOrder (value, quantity, currency, orderId) {
-    this.value = value
-    this.quantity = quantity
-    this.currency = currency
-    this.orderId = orderId
+    const sessionId = await this.stripeService.createOrder(value, quantity, currency, orderId)
+    return sessionId
   }
 }
 
 const makeStripeService = () => {
+  class StripeServiceSpy {
+    async createOrder (value, quantity, currency, orderId) {
+      this.value = value
+      this.quantity = quantity
+      this.currency = currency
+      this.orderId = orderId
+      return this.sessionId
+    }
+  }
+
   const stripeServiceSpy = new StripeServiceSpy()
+  stripeServiceSpy.sessionId = 'sessionId'
   return stripeServiceSpy
 }
 
@@ -84,5 +87,12 @@ describe('Stripe Usecase', () => {
     expect(stripeServiceSpy.quantity).toBe('any_quantity')
     expect(stripeServiceSpy.currency).toBe('any_currency')
     expect(stripeServiceSpy.orderId).toBe('any_orderId')
+  })
+
+  test('Should return a sessionId if correct values are provided', async () => {
+    const { sut, stripeServiceSpy } = makeSut()
+    const sessionId = await sut.pay('any_value', 'any_quantity', 'any_currency', 'any_orderId')
+    expect(sessionId).toBe(stripeServiceSpy.sessionId)
+    expect(sessionId).toBeTruthy()
   })
 })
