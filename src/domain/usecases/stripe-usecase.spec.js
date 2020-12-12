@@ -43,6 +43,17 @@ const makeStripeService = () => {
   return stripeServiceSpy
 }
 
+const makeStripeServiceWithError = () => {
+  class StripeServiceSpy {
+    async createOrder () {
+      throw new Error()
+    }
+  }
+
+  const stripeServiceSpy = new StripeServiceSpy()
+  return stripeServiceSpy
+}
+
 const makeSut = () => {
   const stripeServiceSpy = makeStripeService()
   const sut = new StripeUseCase({
@@ -94,5 +105,13 @@ describe('Stripe Usecase', () => {
     const sessionId = await sut.pay('any_value', 'any_quantity', 'any_currency', 'any_orderId')
     expect(sessionId).toBe(stripeServiceSpy.sessionId)
     expect(sessionId).toBeTruthy()
+  })
+
+  test('Should throw if any dependency throws', async () => {
+    const sut = new StripeUseCase({
+      stripeService: makeStripeServiceWithError()
+    })
+    const promise = sut.pay('any_value', 'any_quantity', 'any_currency', 'any_orderId')
+    expect(promise).rejects.toThrow()
   })
 })
