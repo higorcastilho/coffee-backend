@@ -3,7 +3,7 @@ const mongoose = require('mongoose')
 
 const dbConnection = () => {
   // mongoose.connect(DB_URI, {
-  mongoose.connect('mongodb://localhost:27012', {
+  mongoose.connect('mongodb://localhost:27017/test', {
     useNewUrlParser: true,
     useUnifiedTopology: true
   }).then(() => {
