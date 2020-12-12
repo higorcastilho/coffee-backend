@@ -28,11 +28,10 @@ class StripeService {
   }
 
   async createOrder (value, quantity, currency, orderId) {
-    if (!value || !quantity || !currency || !orderId) {
+    if (!value || !quantity || !currency || !orderId || !this.frontendDomain) {
       throw new MissingParamError('createOrder param is missing')
     }
 
-    // const formattedValue = value * 100
     const session = await stripe.checkout.sessions.create(value, quantity, currency, orderId, this.frontendDomain)
     return session
   }
@@ -60,6 +59,12 @@ describe('Stripe Service Dependecy', () => {
     const sut = new StripeService('frontend_domain')
     const session = await sut.createOrder('any_value', 'any_quantity', 'any_currency', 'any_orderId')
     expect(session).toBe(stripe.checkout.sessions.session)
+  })
+
+  test('Should throw if no frontendDomain is provided', async () => {
+    const sut = new StripeService()
+    const promise = sut.createOrder('any_value', 'any_quantity', 'any_currency', 'any_orderId')
+    expect(promise).rejects.toThrow(new MissingParamError('createOrder param is missing'))
   })
 
   test('Should throw if any of the params is not provided', async () => {
