@@ -26,10 +26,9 @@ jest.mock('stripe', () => ({
   checkout: {
     sessions: {
       payload: {},
-      sessionId: {},
+      sessionId: { id: 'valid_id' },
       create: function (payload) {
         this.payload = payload
-        this.sessionId = { id: 'valid_id' }
         return this.sessionId
       }
     }
@@ -47,14 +46,14 @@ describe('Stripe Service Dependecy', () => {
     expect(stripe.checkout.sessions.payload).toEqual(makePayload('any_value', 'any_quantity', 'any_currency', 'any_orderId', 'frontend_domain'))
   })
 
-  /* test('Should return null if stripe returns null', async () => {
+  test('Should return null if stripe returns null', async () => {
     const sut = new StripeService('frontend_domain')
-    stripe.checkout.sessions.session = null
+    stripe.checkout.sessions.sessionId = { id: null }
     const session = await sut.createOrder('any_value', 'any_quantity', 'any_currency', 'any_orderId')
     expect(session).toBeNull()
-  }) */
+  })
 
-  test('Should return a session if stripe returns a session', async () => {
+  test('Should return a session id if stripe returns a session id', async () => {
     const sut = new StripeService('frontend_domain')
     const sessionId = await sut.createOrder('any_value', 'any_quantity', 'any_currency', 'any_orderId')
     expect(sessionId).toBe(stripe.checkout.sessions.sessionId.id)
