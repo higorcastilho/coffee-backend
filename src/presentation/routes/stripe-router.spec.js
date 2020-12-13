@@ -3,6 +3,10 @@ const { MissingParamError } = require('../../utils/errors')
 const { ServerError } = require('../errors')
 
 class StripeRouter {
+  constructor (stripeUseCase) {
+    this.stripeUseCase = stripeUseCase
+  }
+
   async route (httpRequest) {
     try {
       const { value, quantity, currency, orderId } = httpRequest.body
@@ -21,16 +25,35 @@ class StripeRouter {
       if (!orderId) {
         return HttpResponse.badRequest(new MissingParamError('orderId'))
       }
+
+      await this.stripeUseCase.pay(value, quantity, currency, orderId)
     } catch (error) {
       return HttpResponse.serverError()
     }
   }
 }
 
+const makeStripeUseCase = () => {
+  class StripeUseCaseSpy {
+    async pay (value, quantity, currency, orderId) {
+      this.value = value
+      this.quantity = quantity
+      this.currency = currency
+      this.orderId = orderId
+      return this.sessionId
+    }
+  }
+
+  return new StripeUseCaseSpy()
+}
+
 const makeSut = () => {
-  const sut = new StripeRouter()
+  const stripeUseCaseSpy = makeStripeUseCase()
+  const sut = new StripeRouter(stripeUseCaseSpy)
+  stripeUseCaseSpy.sessionId = 'valid_session_id'
   return {
-    sut
+    sut,
+    stripeUseCaseSpy
   }
 }
 
@@ -104,5 +127,22 @@ describe('Stripe Router', () => {
     const httpResponse = await sut.route(httpRequest)
     expect(httpResponse.statusCode).toBe(500)
     expect(httpResponse.body.error).toBe(new ServerError().message)
+  })
+
+  test('Should call StripeUseCase with correct params', async () => {
+    const { sut, stripeUseCaseSpy } = makeSut()
+    const httpRequest = {
+      body: {
+        value: 'any_value',
+        quantity: 'any_quantity',
+        currency: 'any_currency',
+        orderId: 'any_orderId'
+      }
+    }
+    await sut.route(httpRequest)
+    expect(stripeUseCaseSpy.value).toBe(httpRequest.body.value)
+    expect(stripeUseCaseSpy.quantity).toBe(httpRequest.body.quantity)
+    expect(stripeUseCaseSpy.currency).toBe(httpRequest.body.currency)
+    expect(stripeUseCaseSpy.orderId).toBe(httpRequest.body.orderId)
   })
 })
