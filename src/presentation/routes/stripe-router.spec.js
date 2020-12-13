@@ -97,4 +97,12 @@ describe('Stripe Router', () => {
     expect(httpResponse.statusCode).toBe(500)
     expect(httpResponse.body.error).toBe(new ServerError().message)
   })
+
+  test('Should return 500 if httpRequest has no body', async () => {
+    const { sut } = makeSut()
+    const httpRequest = {}
+    const httpResponse = await sut.route(httpRequest)
+    expect(httpResponse.statusCode).toBe(500)
+    expect(httpResponse.body.error).toBe(new ServerError().message)
+  })
 })
