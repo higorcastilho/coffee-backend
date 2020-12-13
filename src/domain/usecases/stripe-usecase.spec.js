@@ -8,7 +8,8 @@ const makeStripeService = () => {
       this.quantity = quantity
       this.currency = currency
       this.orderId = orderId
-      return this.sessionId
+      this.id = { id: this.sessionId }
+      return this.id
     }
   }
 
@@ -77,7 +78,7 @@ describe('Stripe Usecase', () => {
   test('Should return a sessionId if correct values are provided', async () => {
     const { sut, stripeServiceSpy } = makeSut()
     const sessionId = await sut.pay('any_value', 'any_quantity', 'any_currency', 'any_orderId')
-    expect(sessionId).toBe(stripeServiceSpy.sessionId)
+    expect(sessionId).toEqual(stripeServiceSpy.id)
     expect(sessionId).toBeTruthy()
   })
 

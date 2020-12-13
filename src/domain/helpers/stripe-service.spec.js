@@ -1,18 +1,34 @@
+const makePayload = (value, quantity, currency, orderId, frontendDomain) => {
+  const payload = {
+    payment_method_types: ['card'],
+    line_items: [
+      {
+        price_data: {
+          currency: currency,
+          product_data: {
+            name: 'Stubborn Attachments',
+            images: ['https://static.netshoes.com.br/produtos/whey-gourmet-expresso-700g-performance-nutrition/79/166-0107-479/166-0107-479_zoom1.jpg?ts=1594322077&']
+          },
+          unit_amount: value
+        },
+        quantity: quantity
+      }
+    ],
+    mode: 'payment',
+    success_url: `${frontendDomain}?success=true&order=${orderId}`,
+    cancel_url: `${frontendDomain}?canceled=true&order=${orderId}`
+  }
+
+  return payload
+}
+
 jest.mock('stripe', () => ({
   checkout: {
     sessions: {
-      value: '',
-      quantity: '',
-      currency: '',
-      orderId: '',
-      frontendDomain: '',
-      session: 'valid_session',
-      create: function (value, quantity, currency, orderId, frontendDomain) {
-        this.value = value
-        this.quantity = quantity
-        this.currency = currency
-        this.orderId = orderId
-        this.frontendDomain = frontendDomain
+      payload: {},
+      session: { id: 'valid_id' },
+      create: function (payload) {
+        this.payload = payload
         return this.session
       }
     }
@@ -27,11 +43,7 @@ describe('Stripe Service Dependecy', () => {
   test('Should call stripe with correct values', async () => {
     const sut = new StripeService('frontend_domain')
     await sut.createOrder('any_value', 'any_quantity', 'any_currency', 'any_orderId')
-    expect(stripe.checkout.sessions.frontendDomain).toBe('frontend_domain')
-    expect(stripe.checkout.sessions.value).toBe('any_value')
-    expect(stripe.checkout.sessions.quantity).toBe('any_quantity')
-    expect(stripe.checkout.sessions.currency).toBe('any_currency')
-    expect(stripe.checkout.sessions.orderId).toBe('any_orderId')
+    expect(stripe.checkout.sessions.payload).toEqual(makePayload('any_value', 'any_quantity', 'any_currency', 'any_orderId', 'frontend_domain'))
   })
 
   test('Should return null if stripe returns null', async () => {
@@ -44,6 +56,7 @@ describe('Stripe Service Dependecy', () => {
   test('Should return a session if stripe returns a session', async () => {
     const sut = new StripeService('frontend_domain')
     const session = await sut.createOrder('any_value', 'any_quantity', 'any_currency', 'any_orderId')
+    console.log(session)
     expect(session).toBe(stripe.checkout.sessions.session)
   })
 
