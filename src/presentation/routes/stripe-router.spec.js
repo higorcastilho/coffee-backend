@@ -161,4 +161,19 @@ describe('Stripe Router', () => {
     expect(httpResponse.statusCode).toBe(200)
     expect(httpResponse.body.sessionId).toBe(stripeUseCaseSpy.sessionId)
   })
+
+  test('Should return 500 if no StripeUseCase is provided', async () => {
+    const sut = new StripeRouter()
+    const httpRequest = {
+      body: {
+        value: 'any_value',
+        quantity: 'any_quantity',
+        currency: 'any_currency',
+        orderId: 'any_orderId'
+      }
+    }
+    const httpResponse = await sut.route(httpRequest)
+    expect(httpResponse.statusCode).toBe(500)
+    expect(httpResponse.body.error).toBe(new ServerError().message)
+  })
 })
