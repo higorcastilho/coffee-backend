@@ -24,6 +24,7 @@ class StripePaymentService {
       cancel_url: `${MY_DOMAIN}?canceled=true&order=${orderId}`
     })
 
+    console.log(session)
     return session.id
   }
 }
