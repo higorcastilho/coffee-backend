@@ -48,6 +48,16 @@ const makeStripeUseCase = () => {
   return new StripeUseCaseSpy()
 }
 
+const makeStripeUseCaseWithError = () => {
+  class StripeUseCaseSpy {
+    async pay () {
+      throw new Error()
+    }
+  }
+
+  return new StripeUseCaseSpy()
+}
+
 const makeSut = () => {
   const stripeUseCaseSpy = makeStripeUseCase()
   const sut = new StripeRouter(stripeUseCaseSpy)
@@ -179,6 +189,22 @@ describe('Stripe Router', () => {
 
   test('Should throw if an invalid dependency is provided', async () => {
     const stripeUseCaseSpy = {}
+    const sut = new StripeRouter(stripeUseCaseSpy)
+    const httpRequest = {
+      body: {
+        value: 'any_value',
+        quantity: 'any_quantity',
+        currency: 'any_currency',
+        orderId: 'any_orderId'
+      }
+    }
+    const httpResponse = await sut.route(httpRequest)
+    expect(httpResponse.statusCode).toBe(500)
+    expect(httpResponse.body.error).toBe(new ServerError().message)
+  })
+
+  test('Should throw if any dependency throws', async () => {
+    const stripeUseCaseSpy = makeStripeUseCaseWithError()
     const sut = new StripeRouter(stripeUseCaseSpy)
     const httpRequest = {
       body: {
