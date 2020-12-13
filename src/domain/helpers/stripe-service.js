@@ -1,16 +1,16 @@
 const MissingParamError = require('../../utils/errors/missing-param-error')
-const stripe = require('stripe')
 
 module.exports = class StripeService {
-  constructor (frontendDomain) {
+  constructor (frontendDomain, stripeSecretKey) {
     this.frontendDomain = frontendDomain
+    this.stripeSecretKey = stripeSecretKey
   }
 
   async createOrder (value, quantity, currency, orderId) {
-    if (!value || !quantity || !currency || !orderId || !this.frontendDomain) {
+    if (!value || !quantity || !currency || !orderId || !this.frontendDomain || !this.stripeSecretKey) {
       throw new MissingParamError('createOrder param is missing')
     }
-
+    const stripe = require('stripe')(this.stripeSecretKey)
     const payload = {
       payment_method_types: ['card'],
       line_items: [
