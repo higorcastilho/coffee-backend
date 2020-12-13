@@ -26,9 +26,16 @@ class StripeRouter {
   }
 }
 
+const makeSut = () => {
+  const sut = new StripeRouter()
+  return {
+    sut
+  }
+}
+
 describe('Stripe Router', () => {
   test('Should return 400 if no value is provided', async () => {
-    const sut = new StripeRouter()
+    const { sut } = makeSut()
     const httpRequest = {
       body: {
         quantity: 'any_quantity',
@@ -42,7 +49,7 @@ describe('Stripe Router', () => {
   })
 
   test('Should return 400 if no quantity is provided', async () => {
-    const sut = new StripeRouter()
+    const { sut } = makeSut()
     const httpRequest = {
       body: {
         value: 'any_value',
@@ -56,7 +63,7 @@ describe('Stripe Router', () => {
   })
 
   test('Should return 400 if no currency is provided', async () => {
-    const sut = new StripeRouter()
+    const { sut } = makeSut()
     const httpRequest = {
       body: {
         value: 'any_value',
@@ -70,7 +77,7 @@ describe('Stripe Router', () => {
   })
 
   test('Should return 400 if no orderId is provided', async () => {
-    const sut = new StripeRouter()
+    const { sut } = makeSut()
     const httpRequest = {
       body: {
         value: 'any_value',
