@@ -32,6 +32,6 @@ module.exports = class StripeService {
     }
 
     const session = await stripe.checkout.sessions.create(payload)
-    return session
+    return session.id
   }
 }
