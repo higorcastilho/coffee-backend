@@ -26,7 +26,8 @@ class StripeRouter {
         return HttpResponse.badRequest(new MissingParamError('orderId'))
       }
 
-      await this.stripeUseCase.pay(value, quantity, currency, orderId)
+      const sessionId = await this.stripeUseCase.pay(value, quantity, currency, orderId)
+      return HttpResponse.ok({ sessionId })
     } catch (error) {
       return HttpResponse.serverError()
     }
@@ -144,5 +145,20 @@ describe('Stripe Router', () => {
     expect(stripeUseCaseSpy.quantity).toBe(httpRequest.body.quantity)
     expect(stripeUseCaseSpy.currency).toBe(httpRequest.body.currency)
     expect(stripeUseCaseSpy.orderId).toBe(httpRequest.body.orderId)
+  })
+
+  test('Should return 200 if valid values are provided', async () => {
+    const { sut, stripeUseCaseSpy } = makeSut()
+    const httpRequest = {
+      body: {
+        value: 'any_value',
+        quantity: 'any_quantity',
+        currency: 'any_currency',
+        orderId: 'any_orderId'
+      }
+    }
+    const httpResponse = await sut.route(httpRequest)
+    expect(httpResponse.statusCode).toBe(200)
+    expect(httpResponse.body.sessionId).toBe(stripeUseCaseSpy.sessionId)
   })
 })
