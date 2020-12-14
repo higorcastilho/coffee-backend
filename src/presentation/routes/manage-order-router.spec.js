@@ -116,6 +116,14 @@ describe('Manage Order Router', () => {
     expect(httpResponse.body.error).toBe(new ServerError().message)
   })
 
+  test('Should return 500 if httpRequest has no body', async () => {
+    const { sut } = makeSut()
+    const httpRequest = {}
+    const response = await sut.route(httpRequest)
+    expect(response.statusCode).toBe(500)
+    expect(response.body.error).toBe(new ServerError().message)
+  })
+
   test('Should call ManageCustomerUseCase and ManageOrderInfoUseCase with correct params', async () => {
     const { sut, manageCustomerUseCaseSpy, manageOrderInfoUseCaseSpy } = makeSut()
     const httpRequest = {
