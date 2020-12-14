@@ -16,6 +16,16 @@ const makeManageCustomerUseCase = () => {
   return new ManageCustomerUseCaseSpy()
 }
 
+const makeManageCustomerUseCaseWithError = () => {
+  class ManageCustomerUseCaseSpy {
+    async returnOrCreateUser () {
+      throw new Error()
+    }
+  }
+
+  return new ManageCustomerUseCaseSpy()
+}
+
 const makeManageOrderInfoUseCase = () => {
   class ManageOrderInfoUseCaseSpy {
     async createOrder (paymentMethod, orderNumber, price, quantity, orderStatus) {
@@ -24,6 +34,16 @@ const makeManageOrderInfoUseCase = () => {
       this.price = price
       this.quantity = quantity
       this.orderStatus = orderStatus
+    }
+  }
+
+  return new ManageOrderInfoUseCaseSpy()
+}
+
+const makeManageOrderInfoUseCaseWithError = () => {
+  class ManageOrderInfoUseCaseSpy {
+    async createOrder () {
+      throw new Error()
     }
   }
 
@@ -159,6 +179,33 @@ describe('Manage Order Router', () => {
       new ManageOrderRouter({}),
       new ManageOrderRouter(makeManageCustomerUseCase),
       new ManageOrderRouter(makeManageCustomerUseCase, {})
+    )
+
+    for (const sut of suts) {
+      const httpRequest = {
+        body: {
+          name: 'any_name',
+          email: 'any_email',
+          phone: 'any_phone',
+          address: 'any_adress',
+          zip: 'any_zip',
+          paymentMethod: 'any_paymentMethod',
+          orderNumber: 'any_orderNumber',
+          price: 'any_price',
+          quantity: 'any_quantity',
+          orderStatus: 'any_orderStatus'
+        }
+      }
+      const httpResponse = await sut.route(httpRequest)
+      expect(httpResponse.statusCode).toBe(500)
+      expect(httpResponse.body.error).toBe(new ServerError().message)
+    }
+  })
+
+  test('Should throw if any dependency throws', async () => {
+    const suts = [].concat(
+      new ManageOrderRouter(makeManageCustomerUseCaseWithError()),
+      new ManageOrderRouter(makeManageCustomerUseCase(), makeManageOrderInfoUseCaseWithError())
     )
 
     for (const sut of suts) {
