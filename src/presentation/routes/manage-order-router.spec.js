@@ -10,6 +10,7 @@ const makeManageCustomerUseCase = () => {
       this.phone = phone
       this.address = address
       this.zip = zip
+      return this.customerId
     }
   }
 
@@ -28,12 +29,14 @@ const makeManageCustomerUseCaseWithError = () => {
 
 const makeManageOrderInfoUseCase = () => {
   class ManageOrderInfoUseCaseSpy {
-    async createOrder (paymentMethod, orderNumber, price, quantity, orderStatus) {
+    async createOrder (paymentMethod, orderNumber, price, quantity, orderStatus, customerId = null) {
       this.paymentMethod = paymentMethod
       this.orderNumber = orderNumber
       this.price = price
       this.quantity = quantity
       this.orderStatus = orderStatus
+      this.customerId = customerId
+      return this.orderId
     }
   }
 
@@ -75,8 +78,16 @@ class ManageOrderRouter {
         return HttpResponse.badRequest(new MissingParamError('order info param (e.g.: name, address, quantity ...)'))
       }
 
-      await this.manageCustomerUseCase.returnOrCreateCustomer(name, email, phone, address, zip)
-      await this.manageOrderInfoUseCase.createOrder(paymentMethod, orderNumber, price, quantity, orderStatus)
+      const customerId = await this.manageCustomerUseCase.returnOrCreateCustomer(name, email, phone, address, zip)
+      if (!customerId) {
+        return HttpResponse.serverError()
+      }
+      const orderId = await this.manageOrderInfoUseCase.createOrder(paymentMethod, orderNumber, price, quantity, orderStatus, customerId)
+
+      if (!orderId) {
+        return HttpResponse.serverError()
+      }
+      return HttpResponse.ok({ orderId })
     } catch (error) {
       return HttpResponse.serverError()
     }
@@ -85,7 +96,9 @@ class ManageOrderRouter {
 
 const makeSut = () => {
   const manageCustomerUseCaseSpy = makeManageCustomerUseCase()
+  manageCustomerUseCaseSpy.customerId = 'valid_customerId'
   const manageOrderInfoUseCaseSpy = makeManageOrderInfoUseCase()
+  manageOrderInfoUseCaseSpy.orderId = 'valid_orderId'
   const sut = new ManageOrderRouter(manageCustomerUseCaseSpy, manageOrderInfoUseCaseSpy)
   return {
     sut,
@@ -171,6 +184,29 @@ describe('Manage Order Router', () => {
     expect(manageOrderInfoUseCaseSpy.price).toBe(httpRequest.body.price)
     expect(manageOrderInfoUseCaseSpy.quantity).toBe(httpRequest.body.quantity)
     expect(manageOrderInfoUseCaseSpy.orderStatus).toBe(httpRequest.body.orderStatus)
+  })
+
+  test('Should return 200 if valid params are provided', async () => {
+    const { sut, manageOrderInfoUseCaseSpy } = makeSut()
+    const httpRequest = {
+      body: {
+        name: 'any_name',
+        email: 'any_email',
+        phone: 'any_phone',
+        address: 'any_adress',
+        zip: 'any_zip',
+        paymentMethod: 'any_paymentMethod',
+        orderNumber: 'any_orderNumber',
+        price: 'any_price',
+        quantity: 'any_quantity',
+        orderStatus: 'any_orderStatus'
+      }
+    }
+
+    const httpResponse = await sut.route(httpRequest)
+    expect(httpResponse.statusCode).toBe(200)
+    expect(httpResponse.body.orderId).toBe(manageOrderInfoUseCaseSpy.orderId)
+    expect(httpResponse.body.orderId).toBeTruthy()
   })
 
   test('Should throw if invalid dependencies are provided', async () => {
