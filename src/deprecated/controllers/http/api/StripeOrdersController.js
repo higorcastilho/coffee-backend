@@ -11,4 +11,5 @@ class StripeOrdersController {
     res.json({ id: sessionId })
   }
 }
+
 module.exports = StripeOrdersController
