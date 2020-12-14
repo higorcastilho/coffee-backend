@@ -4,7 +4,7 @@ const { ServerError } = require('../errors')
 
 const makeManageCustomerUseCase = () => {
   class ManageCustomerUseCaseSpy {
-    async returnOrCreateUser (name, email, phone, address, zip) {
+    async returnOrCreateCustomer (name, email, phone, address, zip) {
       this.name = name
       this.email = email
       this.phone = phone
@@ -18,7 +18,7 @@ const makeManageCustomerUseCase = () => {
 
 const makeManageCustomerUseCaseWithError = () => {
   class ManageCustomerUseCaseSpy {
-    async returnOrCreateUser () {
+    async returnOrCreateCustomer () {
       throw new Error()
     }
   }
@@ -75,7 +75,7 @@ class ManageOrderRouter {
         return HttpResponse.badRequest(new MissingParamError('order info param (e.g.: name, address, quantity ...)'))
       }
 
-      await this.manageCustomerUseCase.returnOrCreateUser(name, email, phone, address, zip)
+      await this.manageCustomerUseCase.returnOrCreateCustomer(name, email, phone, address, zip)
       await this.manageOrderInfoUseCase.createOrder(paymentMethod, orderNumber, price, quantity, orderStatus)
     } catch (error) {
       return HttpResponse.serverError()
