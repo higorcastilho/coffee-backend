@@ -1,5 +1,6 @@
 const HttpResponse = require('../helpers/http-response')
 const { MissingParamError } = require('../../utils/errors')
+const { ServerError } = require('../errors')
 
 const makeManageCustomerUseCase = () => {
   class ManageCustomerUseCaseSpy {
@@ -36,25 +37,29 @@ class ManageOrderRouter {
   }
 
   async route (httpRequest) {
-    const {
-      name,
-      email,
-      phone,
-      address,
-      zip,
-      paymentMethod,
-      orderNumber,
-      price,
-      quantity,
-      orderStatus
-    } = httpRequest.body
+    try {
+      const {
+        name,
+        email,
+        phone,
+        address,
+        zip,
+        paymentMethod,
+        orderNumber,
+        price,
+        quantity,
+        orderStatus
+      } = httpRequest.body
 
-    if (!name || !email || !phone || !address || !zip || !paymentMethod || !orderNumber || !price || !quantity || !orderStatus) {
-      return HttpResponse.badRequest(new MissingParamError('order info param (e.g.: name, address, quantity ...)'))
+      if (!name || !email || !phone || !address || !zip || !paymentMethod || !orderNumber || !price || !quantity || !orderStatus) {
+        return HttpResponse.badRequest(new MissingParamError('order info param (e.g.: name, address, quantity ...)'))
+      }
+
+      await this.manageCustomerUseCase.returnOrCreateUser(name, email, phone, address, zip)
+      await this.manageOrderInfoUseCase.createOrder(paymentMethod, orderNumber, price, quantity, orderStatus)
+    } catch (error) {
+      return HttpResponse.serverError()
     }
-
-    await this.manageCustomerUseCase.returnOrCreateUser(name, email, phone, address, zip)
-    await this.manageOrderInfoUseCase.createOrder(paymentMethod, orderNumber, price, quantity, orderStatus)
   }
 }
 
@@ -103,6 +108,13 @@ describe('Manage Order Router', () => {
       expect(httpResponse.body.error).toBe(new MissingParamError('order info param (e.g.: name, address, quantity ...)').message)
     })
   }
+
+  test('Should return 500 if no httpRequest is provided', async () => {
+    const { sut } = makeSut()
+    const httpResponse = await sut.route()
+    expect(httpResponse.statusCode).toBe(500)
+    expect(httpResponse.body.error).toBe(new ServerError().message)
+  })
 
   test('Should call ManageCustomerUseCase and ManageOrderInfoUseCase with correct params', async () => {
     const { sut, manageCustomerUseCaseSpy, manageOrderInfoUseCaseSpy } = makeSut()
