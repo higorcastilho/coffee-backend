@@ -152,4 +152,33 @@ describe('Manage Order Router', () => {
     expect(manageOrderInfoUseCaseSpy.quantity).toBe(httpRequest.body.quantity)
     expect(manageOrderInfoUseCaseSpy.orderStatus).toBe(httpRequest.body.orderStatus)
   })
+
+  test('Should throw if invalid dependencies are provided', async () => {
+    const suts = [].concat(
+      new ManageOrderRouter(),
+      new ManageOrderRouter({}),
+      new ManageOrderRouter(makeManageCustomerUseCase),
+      new ManageOrderRouter(makeManageCustomerUseCase, {})
+    )
+
+    for (const sut of suts) {
+      const httpRequest = {
+        body: {
+          name: 'any_name',
+          email: 'any_email',
+          phone: 'any_phone',
+          address: 'any_adress',
+          zip: 'any_zip',
+          paymentMethod: 'any_paymentMethod',
+          orderNumber: 'any_orderNumber',
+          price: 'any_price',
+          quantity: 'any_quantity',
+          orderStatus: 'any_orderStatus'
+        }
+      }
+      const httpResponse = await sut.route(httpRequest)
+      expect(httpResponse.statusCode).toBe(500)
+      expect(httpResponse.body.error).toBe(new ServerError().message)
+    }
+  })
 })
