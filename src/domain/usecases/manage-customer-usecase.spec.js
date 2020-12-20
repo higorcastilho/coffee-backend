@@ -1,8 +1,9 @@
 const { MissingParamError } = require('../../utils/errors')
 
 class ManageCustomerUsecase {
-  constructor (loadUserByEmailRepository) {
+  constructor (loadUserByEmailRepository, createUserRepository) {
     this.loadUserByEmailRepository = loadUserByEmailRepository
+    this.createUserRepository = createUserRepository
   }
 
   async returnOrCreateCustomer (name, email, phone, address, zip) {
@@ -28,8 +29,26 @@ class ManageCustomerUsecase {
 
     const customer = await this.loadUserByEmailRepository.load(email)
 
+    if (!customer) {
+      await this.createUserRepository.create(name, email, phone, address, zip)
+    }
+
     return customer
   }
+}
+
+const makeCreateUserRepository = () => {
+  class CreateUserRepositorySpy {
+    async create (name, email, phone, address, zip) {
+      this.name = name
+      this.email = email
+      this.phone = phone
+      this.address = address
+      this.zip = zip
+    }
+  }
+
+  return new CreateUserRepositorySpy()
 }
 
 const makeLoadUserByEmailRepository = () => {
@@ -45,9 +64,11 @@ const makeLoadUserByEmailRepository = () => {
 
 const makeSut = () => {
   const loadUserByEmailRepositorySpy = makeLoadUserByEmailRepository()
-  const sut = new ManageCustomerUsecase(loadUserByEmailRepositorySpy)
+  const createUserRepositorySpy = makeCreateUserRepository()
+  const sut = new ManageCustomerUsecase(loadUserByEmailRepositorySpy, createUserRepositorySpy)
   return {
     loadUserByEmailRepositorySpy,
+    createUserRepositorySpy,
     sut
   }
 }
@@ -95,5 +116,16 @@ describe('Manage Customer Usecase ', () => {
     const customer = await sut.returnOrCreateCustomer('any_name', 'valid_email', 'any_phone', 'any_address', 'any_zip')
     expect(customer).toBe('valid_user')
     expect(customer).toBeTruthy()
+  })
+
+  test('Should call CreateUserRepository with correct values', async () => {
+    const { sut, loadUserByEmailRepositorySpy, createUserRepositorySpy } = makeSut()
+    loadUserByEmailRepositorySpy.user = null
+    await sut.returnOrCreateCustomer('any_name', 'valid_email', 'any_phone', 'any_address', 'any_zip')
+    expect(createUserRepositorySpy.name).toBe('any_name')
+    expect(createUserRepositorySpy.email).toBe('valid_email')
+    expect(createUserRepositorySpy.phone).toBe('any_phone')
+    expect(createUserRepositorySpy.address).toBe('any_address')
+    expect(createUserRepositorySpy.zip).toBe('any_zip')
   })
 })
