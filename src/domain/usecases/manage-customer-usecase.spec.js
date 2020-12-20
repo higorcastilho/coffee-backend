@@ -24,33 +24,40 @@ class ManageCustomerUsecase {
   }
 }
 
+const makeSut = () => {
+  const sut = new ManageCustomerUsecase()
+  return {
+    sut
+  }
+}
+
 describe('Manage Customer Usecase ', () => {
   test('Should throw if no name is provided', async () => {
-    const sut = new ManageCustomerUsecase()
+    const { sut } = makeSut()
     const promise = sut.returnOrCreateCustomer()
     expect(promise).rejects.toThrow(new MissingParamError('name'))
   })
 
   test('Should throw if no email is provided', async () => {
-    const sut = new ManageCustomerUsecase()
+    const { sut } = makeSut()
     const promise = sut.returnOrCreateCustomer('any_name')
     expect(promise).rejects.toThrow(new MissingParamError('email'))
   })
 
   test('Should throw if no phone is provided', async () => {
-    const sut = new ManageCustomerUsecase()
+    const { sut } = makeSut()
     const promise = sut.returnOrCreateCustomer('any_name', 'any_email')
     expect(promise).rejects.toThrow(new MissingParamError('phone'))
   })
 
   test('Should throw if no address is provided', async () => {
-    const sut = new ManageCustomerUsecase()
+    const { sut } = makeSut()
     const promise = sut.returnOrCreateCustomer('any_name', 'any_email', 'any_phone')
     expect(promise).rejects.toThrow(new MissingParamError('address'))
   })
 
   test('Should throw if no zip is provided', async () => {
-    const sut = new ManageCustomerUsecase()
+    const { sut } = makeSut()
     const promise = sut.returnOrCreateCustomer('any_name', 'any_email', 'any_phone', 'any_address')
     expect(promise).rejects.toThrow(new MissingParamError('zip'))
   })
