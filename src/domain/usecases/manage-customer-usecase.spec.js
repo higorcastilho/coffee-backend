@@ -1,6 +1,10 @@
 const { MissingParamError } = require('../../utils/errors')
 
 class ManageCustomerUsecase {
+  constructor (loadUserByEmailRepository) {
+    this.loadUserByEmailRepository = loadUserByEmailRepository
+  }
+
   async returnOrCreateCustomer (name, email, phone, address, zip) {
     if (!name) {
       throw new MissingParamError('name')
@@ -21,12 +25,26 @@ class ManageCustomerUsecase {
     if (!zip) {
       throw new MissingParamError('zip')
     }
+
+    this.loadUserByEmailRepository.load('any_email')
   }
 }
 
+const makeLoadUserByEmailRepository = () => {
+  class LoadUserByEmailRepositorySpy {
+    async load (email) {
+      this.email = email
+    }
+  }
+
+  return new LoadUserByEmailRepositorySpy()
+}
+
 const makeSut = () => {
-  const sut = new ManageCustomerUsecase()
+  const loadUserByEmailRepositorySpy = makeLoadUserByEmailRepository()
+  const sut = new ManageCustomerUsecase(loadUserByEmailRepositorySpy)
   return {
+    loadUserByEmailRepositorySpy,
     sut
   }
 }
@@ -60,5 +78,11 @@ describe('Manage Customer Usecase ', () => {
     const { sut } = makeSut()
     const promise = sut.returnOrCreateCustomer('any_name', 'any_email', 'any_phone', 'any_address')
     expect(promise).rejects.toThrow(new MissingParamError('zip'))
+  })
+
+  test('Should call LoadUserByEmailRepository with correct email', async () => {
+    const { sut, loadUserByEmailRepositorySpy } = makeSut()
+    await sut.returnOrCreateCustomer('any_name', 'any_email', 'any_phone', 'any_address', 'any_zip')
+    expect(loadUserByEmailRepositorySpy.email).toBe('any_email')
   })
 })
