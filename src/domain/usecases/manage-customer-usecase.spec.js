@@ -26,7 +26,9 @@ class ManageCustomerUsecase {
       throw new MissingParamError('zip')
     }
 
-    this.loadUserByEmailRepository.load('any_email')
+    const customer = await this.loadUserByEmailRepository.load(email)
+
+    return customer
   }
 }
 
@@ -34,6 +36,7 @@ const makeLoadUserByEmailRepository = () => {
   class LoadUserByEmailRepositorySpy {
     async load (email) {
       this.email = email
+      return this.user
     }
   }
 
@@ -84,5 +87,13 @@ describe('Manage Customer Usecase ', () => {
     const { sut, loadUserByEmailRepositorySpy } = makeSut()
     await sut.returnOrCreateCustomer('any_name', 'any_email', 'any_phone', 'any_address', 'any_zip')
     expect(loadUserByEmailRepositorySpy.email).toBe('any_email')
+  })
+
+  test('Should return a customer if valid e-mail is provided', async () => {
+    const { sut, loadUserByEmailRepositorySpy } = makeSut()
+    loadUserByEmailRepositorySpy.user = 'valid_user'
+    const customer = await sut.returnOrCreateCustomer('any_name', 'valid_email', 'any_phone', 'any_address', 'any_zip')
+    expect(customer).toBe('valid_user')
+    expect(customer).toBeTruthy()
   })
 })
