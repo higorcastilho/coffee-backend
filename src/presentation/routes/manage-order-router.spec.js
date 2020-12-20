@@ -1,6 +1,6 @@
-const HttpResponse = require('../helpers/http-response')
 const { MissingParamError } = require('../../utils/errors')
 const { ServerError } = require('../errors')
+const ManageOrderRouter = require('./manage-order-router')
 
 const makeManageCustomerUseCase = () => {
   class ManageCustomerUseCaseSpy {
@@ -53,47 +53,6 @@ const makeManageOrderInfoUseCaseWithError = () => {
   return new ManageOrderInfoUseCaseSpy()
 }
 
-class ManageOrderRouter {
-  constructor (manageCustomerUseCase, manageOrderInfoUseCase) {
-    this.manageCustomerUseCase = manageCustomerUseCase
-    this.manageOrderInfoUseCase = manageOrderInfoUseCase
-  }
-
-  async route (httpRequest) {
-    try {
-      const {
-        name,
-        email,
-        phone,
-        address,
-        zip,
-        paymentMethod,
-        orderNumber,
-        price,
-        quantity,
-        orderStatus
-      } = httpRequest.body
-
-      if (!name || !email || !phone || !address || !zip || !paymentMethod || !orderNumber || !price || !quantity || !orderStatus) {
-        return HttpResponse.badRequest(new MissingParamError('order info param (e.g.: name, address, quantity ...)'))
-      }
-
-      const customerId = await this.manageCustomerUseCase.returnOrCreateCustomer(name, email, phone, address, zip)
-      if (!customerId) {
-        return HttpResponse.serverError()
-      }
-      const orderId = await this.manageOrderInfoUseCase.createOrder(paymentMethod, orderNumber, price, quantity, orderStatus, customerId)
-
-      if (!orderId) {
-        return HttpResponse.serverError()
-      }
-      return HttpResponse.ok({ orderId })
-    } catch (error) {
-      return HttpResponse.serverError()
-    }
-  }
-}
-
 const makeSut = () => {
   const manageCustomerUseCaseSpy = makeManageCustomerUseCase()
   manageCustomerUseCaseSpy.customerId = 'valid_customerId'
@@ -121,7 +80,7 @@ const orderStatus = 'any_orderStatus'
 
 const params = [name, email, phone, address, zip, paymentMethod, orderNumber, price, quantity, orderStatus]
 
-const makeVariableHttpRquest = (array, position) => {
+const changeHttpRquest = (array, position) => {
   array.splice(position, 1)
   const body = {}
   array.forEach(item => {
@@ -135,7 +94,7 @@ describe('Manage Order Router', () => {
   for (let i = 0; i < params.length; i++) {
     test('Should return 400 if any of the params is not provided', async () => {
       const { sut } = makeSut()
-      const httpRequest = { body: makeVariableHttpRquest([...params], i) }
+      const httpRequest = { body: changeHttpRquest([...params], i) }
       const httpResponse = await sut.route(httpRequest)
       expect(httpResponse.statusCode).toBe(400)
       expect(httpResponse.body.error).toBe(new MissingParamError('order info param (e.g.: name, address, quantity ...)').message)
