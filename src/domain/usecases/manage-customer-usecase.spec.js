@@ -13,6 +13,10 @@ class ManageCustomerUsecase {
     if (!phone) {
       throw new MissingParamError('phone')
     }
+
+    if (!address) {
+      throw new MissingParamError('address')
+    }
   }
 }
 
@@ -33,5 +37,11 @@ describe('Manage Customer Usecase ', () => {
     const sut = new ManageCustomerUsecase()
     const promise = sut.returnOrCreateCustomer('any_name', 'any_email')
     expect(promise).rejects.toThrow(new MissingParamError('phone'))
+  })
+
+  test('Should throw if no address is provided', async () => {
+    const sut = new ManageCustomerUsecase()
+    const promise = sut.returnOrCreateCustomer('any_name', 'any_email', 'any_phone')
+    expect(promise).rejects.toThrow(new MissingParamError('address'))
   })
 })
