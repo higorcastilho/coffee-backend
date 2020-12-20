@@ -17,6 +17,10 @@ class ManageCustomerUsecase {
     if (!address) {
       throw new MissingParamError('address')
     }
+
+    if (!zip) {
+      throw new MissingParamError('zip')
+    }
   }
 }
 
@@ -43,5 +47,11 @@ describe('Manage Customer Usecase ', () => {
     const sut = new ManageCustomerUsecase()
     const promise = sut.returnOrCreateCustomer('any_name', 'any_email', 'any_phone')
     expect(promise).rejects.toThrow(new MissingParamError('address'))
+  })
+
+  test('Should throw if no zip is provided', async () => {
+    const sut = new ManageCustomerUsecase()
+    const promise = sut.returnOrCreateCustomer('any_name', 'any_email', 'any_phone', 'any_address')
+    expect(promise).rejects.toThrow(new MissingParamError('zip'))
   })
 })
