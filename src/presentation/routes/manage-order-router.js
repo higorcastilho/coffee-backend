@@ -25,11 +25,11 @@ module.exports = class ManageOrderRouter {
         return HttpResponse.badRequest(new MissingParamError('order info param (e.g.: name, address, quantity ...)'))
       }
 
-      const customerId = await this.manageCustomerUseCase.returnOrCreateCustomer(name, email, phone, address, zip)
-      if (!customerId) {
+      const customer = await this.manageCustomerUseCase.returnOrCreateCustomer(name, email, phone, address, zip)
+      if (!customer) {
         return HttpResponse.serverError()
       }
-      const orderId = await this.manageOrderInfoUseCase.createOrder(paymentMethod, orderNumber, price, quantity, orderStatus, customerId)
+      const orderId = await this.manageOrderInfoUseCase.createOrder(paymentMethod, orderNumber, price, quantity, orderStatus, customer.id)
 
       if (!orderId) {
         return HttpResponse.serverError()

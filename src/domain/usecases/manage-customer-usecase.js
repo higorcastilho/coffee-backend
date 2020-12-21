@@ -30,7 +30,8 @@ module.exports = class ManageCustomerUsecase {
     const customer = await this.loadUserByEmailRepository.load(email)
 
     if (!customer) {
-      await this.createUserRepository.create(name, email, phone, address, zip)
+      const customer = await this.createUserRepository.create(name, email, phone, address, zip)
+      return customer
     }
 
     return customer

@@ -9,6 +9,7 @@ const makeCreateUserRepository = () => {
       this.phone = phone
       this.address = address
       this.zip = zip
+      return this.user
     }
   }
 
@@ -97,20 +98,29 @@ describe('Manage Customer Usecase ', () => {
   test('Should return a customer if valid e-mail is provided', async () => {
     const { sut, loadUserByEmailRepositorySpy } = makeSut()
     loadUserByEmailRepositorySpy.user = 'valid_user'
-    const customer = await sut.returnOrCreateCustomer('any_name', 'valid_email', 'any_phone', 'any_address', 'any_zip')
-    expect(customer).toBe('valid_user')
-    expect(customer).toBeTruthy()
+    const customerId = await sut.returnOrCreateCustomer('any_name', 'valid_email', 'any_phone', 'any_address', 'any_zip')
+    expect(customerId).toBe('valid_user')
+    expect(customerId).toBeTruthy()
   })
 
   test('Should call CreateUserRepository with correct values', async () => {
     const { sut, loadUserByEmailRepositorySpy, createUserRepositorySpy } = makeSut()
     loadUserByEmailRepositorySpy.user = null
-    await sut.returnOrCreateCustomer('any_name', 'valid_email', 'any_phone', 'any_address', 'any_zip')
+    await sut.returnOrCreateCustomer('any_name', 'not_registered_email', 'any_phone', 'any_address', 'any_zip')
     expect(createUserRepositorySpy.name).toBe('any_name')
-    expect(createUserRepositorySpy.email).toBe('valid_email')
+    expect(createUserRepositorySpy.email).toBe('not_registered_email')
     expect(createUserRepositorySpy.phone).toBe('any_phone')
     expect(createUserRepositorySpy.address).toBe('any_address')
     expect(createUserRepositorySpy.zip).toBe('any_zip')
+  })
+
+  test('Should create and return a customer if not registered e-mail is provided', async () => {
+    const { sut, loadUserByEmailRepositorySpy, createUserRepositorySpy } = makeSut()
+    loadUserByEmailRepositorySpy.user = null
+    createUserRepositorySpy.user = 'valid_user'
+    const customerId = await sut.returnOrCreateCustomer('any_name', 'not_registered_email', 'any_phone', 'any_address', 'any_zip')
+    expect(customerId).toBe('valid_user')
+    expect(customerId).toBeTruthy()
   })
 
   test('Should throw if invalid dependencies are provided', async () => {
