@@ -51,11 +51,31 @@ const makeCreateUserRepository = () => {
   return new CreateUserRepositorySpy()
 }
 
+const makeCreateUserRepositoryWithError = () => {
+  class CreateUserRepositorySpy {
+    async create () {
+      throw new Error()
+    }
+  }
+
+  return new CreateUserRepositorySpy()
+}
+
 const makeLoadUserByEmailRepository = () => {
   class LoadUserByEmailRepositorySpy {
     async load (email) {
       this.email = email
       return this.user
+    }
+  }
+
+  return new LoadUserByEmailRepositorySpy()
+}
+
+const makeLoadUserByEmailRepositoryWithError = () => {
+  class LoadUserByEmailRepositorySpy {
+    async load () {
+      throw new Error()
     }
   }
 
@@ -127,5 +147,33 @@ describe('Manage Customer Usecase ', () => {
     expect(createUserRepositorySpy.phone).toBe('any_phone')
     expect(createUserRepositorySpy.address).toBe('any_address')
     expect(createUserRepositorySpy.zip).toBe('any_zip')
+  })
+
+  test('Should throw if invalid dependencies are provided', async () => {
+    const loadUserByEmailRepositorySpy = makeLoadUserByEmailRepository()
+    const suts = [].concat(
+      new ManageCustomerUsecase(null, null),
+      new ManageCustomerUsecase({}, null),
+      new ManageCustomerUsecase(loadUserByEmailRepositorySpy, null),
+      new ManageCustomerUsecase(loadUserByEmailRepositorySpy, {})
+    )
+
+    for (const sut of suts) {
+      const promise = sut.returnOrCreateCustomer('any_name', 'valid_email', 'any_phone', 'any_address', 'any_zip')
+      expect(promise).rejects.toThrow()
+    }
+  })
+
+  test('Should throw if any dependency throws', () => {
+    const loadUserByEmailRepositorySpy = makeLoadUserByEmailRepository()
+    const suts = [].concat(
+      new ManageCustomerUsecase(makeLoadUserByEmailRepositoryWithError()),
+      new ManageCustomerUsecase(loadUserByEmailRepositorySpy, makeCreateUserRepositoryWithError)
+    )
+
+    for (const sut of suts) {
+      const promise = sut.returnOrCreateCustomer('any_name', 'valid_email', 'any_phone', 'any_address', 'any_zip')
+      expect(promise).rejects.toThrow()
+    }
   })
 })
