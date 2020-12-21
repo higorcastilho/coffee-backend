@@ -26,9 +26,19 @@ class ManageOrderInfoUseCase {
       throw new MissingParamError('customer id')
     }
 
-    const order = this.createOrderRepository.create(paymentMethod, price, quantity, orderStatus, customerId)
-    return order.ops[0]._id
+    const order = await this.createOrderRepository.create(paymentMethod, price, quantity, orderStatus, customerId)
+    return order
   }
+}
+
+const makeCreateOrderRepositoryWithError = () => {
+  class CreateOrderRepositorySpy {
+    async create () {
+      throw new Error()
+    }
+  }
+
+  return new CreateOrderRepositorySpy()
 }
 
 const makeSut = () => {
@@ -79,5 +89,12 @@ describe('Order Info Usecase', () => {
       const promise = sut.createOrder('any_payment_method', 'any_price', 'any_quantity', 'any_order_status', 'any_customer_id')
       expect(promise).rejects.toThrow()
     }
+  })
+
+  test('Should throw if any dependency throws', async () => {
+    const createOrderRepositorySpyWithError = makeCreateOrderRepositoryWithError()
+    const sut = new ManageOrderInfoUseCase(createOrderRepositorySpyWithError)
+    const promise = sut.createOrder('any_payment_method', 'any_price', 'any_quantity', 'any_order_status', 'any_customer_id')
+    expect(promise).rejects.toThrow()
   })
 })
