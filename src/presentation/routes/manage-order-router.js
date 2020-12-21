@@ -29,7 +29,7 @@ module.exports = class ManageOrderRouter {
       if (!customer) {
         return HttpResponse.serverError()
       }
-      const orderId = await this.manageOrderInfoUseCase.createOrder(paymentMethod, orderNumber, price, quantity, orderStatus, customer.id)
+      const orderId = await this.manageOrderInfoUseCase.createOrder(paymentMethod, orderNumber, price, quantity, orderStatus, customer._id)
 
       if (!orderId) {
         return HttpResponse.serverError()

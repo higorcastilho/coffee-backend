@@ -1,31 +1,8 @@
 const MongoHelper = require('../helpers/mongo-helper')
 const MissingParamError = require('../../utils/errors/missing-param-error')
+const CreateUserRepository = require('./create-user-repository')
 
 let userModel
-
-class CreateUserRepository {
-  async create (name, email, phone, address, zip) {
-    if (!name) {
-      throw new MissingParamError('name')
-    }
-
-    if (!email) {
-      throw new MissingParamError('email')
-    }
-
-    if (!phone) {
-      throw new MissingParamError('phone')
-    }
-
-    if (!address) {
-      throw new MissingParamError('address')
-    }
-
-    if (!zip) {
-      throw new MissingParamError('zip')
-    }
-  }
-}
 
 const makeSut = () => {
   const sut = new CreateUserRepository()
@@ -76,5 +53,18 @@ describe('Create User Repository', () => {
     const { sut } = makeSut()
     const promise = sut.create('any_name', 'unregistered_email', 'any_phone', 'any_address')
     expect(promise).rejects.toThrow(new MissingParamError('zip'))
+  })
+
+  test('Should return a user if a user is successfully created', async () => {
+    const { sut } = makeSut()
+    const customer = await sut.create('any_name', 'unregistered_email', 'any_phone', 'any_address', 'any_zip')
+    expect(customer.ops[0]).toEqual({
+      _id: customer.ops[0]._id,
+      name: 'any_name',
+      email: 'unregistered_email',
+      phone: 'any_phone',
+      address: 'any_address',
+      zip: 'any_zip'
+    })
   })
 })
