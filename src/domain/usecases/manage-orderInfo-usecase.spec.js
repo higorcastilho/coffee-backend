@@ -68,4 +68,16 @@ describe('Order Info Usecase', () => {
     const promise = sut.createOrder('any_payment_method', 'any_price', 'any_quantity', 'any_order_status')
     expect(promise).rejects.toThrow(new MissingParamError('customer id'))
   })
+
+  test('Should throw if invalid dependencies are provided', async () => {
+    const suts = [].concat(
+      new ManageOrderInfoUseCase(null),
+      new ManageOrderInfoUseCase({})
+    )
+
+    for (const sut of suts) {
+      const promise = sut.createOrder('any_payment_method', 'any_price', 'any_quantity', 'any_order_status', 'any_customer_id')
+      expect(promise).rejects.toThrow()
+    }
+  })
 })
