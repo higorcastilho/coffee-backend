@@ -15,13 +15,12 @@ module.exports = class ManageOrderRouter {
         address,
         zip,
         paymentMethod,
-        orderNumber,
         price,
         quantity,
         orderStatus
       } = httpRequest.body
 
-      if (!name || !email || !phone || !address || !zip || !paymentMethod || !orderNumber || !price || !quantity || !orderStatus) {
+      if (!name || !email || !phone || !address || !zip || !paymentMethod || !price || !quantity || !orderStatus) {
         return HttpResponse.badRequest(new MissingParamError('order info param (e.g.: name, address, quantity ...)'))
       }
 
@@ -29,7 +28,7 @@ module.exports = class ManageOrderRouter {
       if (!customer) {
         return HttpResponse.serverError()
       }
-      const orderId = await this.manageOrderInfoUseCase.createOrder(paymentMethod, orderNumber, price, quantity, orderStatus, customer._id)
+      const orderId = await this.manageOrderInfoUseCase.createOrder(paymentMethod, price, quantity, orderStatus, customer._id)
 
       if (!orderId) {
         return HttpResponse.serverError()

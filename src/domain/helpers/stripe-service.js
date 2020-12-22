@@ -11,7 +11,6 @@ module.exports = class StripeService {
     if (!value || !quantity || !currency || !orderId || !this.frontendDomain || !this.stripeSecretKey) {
       throw new MissingParamError('createOrder param is missing')
     }
-
     const stripe = require('stripe')(this.stripeSecretKey)
     const payload = {
       payment_method_types: ['card'],
@@ -35,6 +34,7 @@ module.exports = class StripeService {
 
     const session = await stripe.checkout.sessions.create(payload)
     return session.id
+
     // } catch (e) {
     // console.log(e)
     // }

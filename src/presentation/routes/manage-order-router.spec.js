@@ -29,9 +29,8 @@ const makeManageCustomerUseCaseWithError = () => {
 
 const makeManageOrderInfoUseCase = () => {
   class ManageOrderInfoUseCaseSpy {
-    async createOrder (paymentMethod, orderNumber, price, quantity, orderStatus, customerId = null) {
+    async createOrder (paymentMethod, price, quantity, orderStatus, customerId = null) {
       this.paymentMethod = paymentMethod
-      this.orderNumber = orderNumber
       this.price = price
       this.quantity = quantity
       this.orderStatus = orderStatus
@@ -73,12 +72,11 @@ const phone = 'any_phone'
 const address = 'any_adress'
 const zip = 'any_zip'
 const paymentMethod = 'any_paymentMethod'
-const orderNumber = 'any_orderNumber'
 const price = 'any_price'
 const quantity = 'any_quantity'
 const orderStatus = 'any_orderStatus'
 
-const params = [name, email, phone, address, zip, paymentMethod, orderNumber, price, quantity, orderStatus]
+const params = [name, email, phone, address, zip, paymentMethod, price, quantity, orderStatus]
 
 const changeHttpRquest = (array, position) => {
   array.splice(position, 1)
@@ -126,7 +124,6 @@ describe('Manage Order Router', () => {
         address: 'any_adress',
         zip: 'any_zip',
         paymentMethod: 'any_paymentMethod',
-        orderNumber: 'any_orderNumber',
         price: 'any_price',
         quantity: 'any_quantity',
         orderStatus: 'any_orderStatus'
@@ -139,7 +136,6 @@ describe('Manage Order Router', () => {
     expect(manageCustomerUseCaseSpy.address).toBe(httpRequest.body.address)
     expect(manageCustomerUseCaseSpy.zip).toBe(httpRequest.body.zip)
     expect(manageOrderInfoUseCaseSpy.paymentMethod).toBe(httpRequest.body.paymentMethod)
-    expect(manageOrderInfoUseCaseSpy.orderNumber).toBe(httpRequest.body.orderNumber)
     expect(manageOrderInfoUseCaseSpy.price).toBe(httpRequest.body.price)
     expect(manageOrderInfoUseCaseSpy.quantity).toBe(httpRequest.body.quantity)
     expect(manageOrderInfoUseCaseSpy.orderStatus).toBe(httpRequest.body.orderStatus)
@@ -155,7 +151,6 @@ describe('Manage Order Router', () => {
         address: 'any_adress',
         zip: 'any_zip',
         paymentMethod: 'any_paymentMethod',
-        orderNumber: 'any_orderNumber',
         price: 'any_price',
         quantity: 'any_quantity',
         orderStatus: 'any_orderStatus'
@@ -185,7 +180,6 @@ describe('Manage Order Router', () => {
           address: 'any_adress',
           zip: 'any_zip',
           paymentMethod: 'any_paymentMethod',
-          orderNumber: 'any_orderNumber',
           price: 'any_price',
           quantity: 'any_quantity',
           orderStatus: 'any_orderStatus'
@@ -212,7 +206,6 @@ describe('Manage Order Router', () => {
           address: 'any_adress',
           zip: 'any_zip',
           paymentMethod: 'any_paymentMethod',
-          orderNumber: 'any_orderNumber',
           price: 'any_price',
           quantity: 'any_quantity',
           orderStatus: 'any_orderStatus'

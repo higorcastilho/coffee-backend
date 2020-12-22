@@ -8,14 +8,4 @@ services:
     ports:
       - "27017:27017"
     volumes:
-      - /home/hc/Desenvolvimento/Docker/Volumes/MongoDB:/data/db  
-  app:
-    container_name: app
-    restart: always
-    build: .
-    depends_on:
-      - mongo
-    ports:
-      - "5000:5000"
-    links:
-      - mongo 
+      - /home/hc/Desenvolvimento/Docker/Volumes/MongoDB:/data/db
