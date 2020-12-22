@@ -26,7 +26,8 @@ class ManageOrderInfoUseCase {
       throw new MissingParamError('customer id')
     }
 
-    await this.createOrderRepository.create(paymentMethod, price, quantity, orderStatus, customerId)
+    const order = await this.createOrderRepository.create(paymentMethod, price, quantity, orderStatus, customerId)
+    return order
   }
 }
 
@@ -38,10 +39,16 @@ const makeCreateOrderRepository = () => {
       this.quantity = quantity
       this.orderStatus = orderStatus
       this.customerId = customerId
+      return this.order
     }
   }
 
-  return new CreateOrderRepositorySpy()
+  const createOrderRepositorySpy = new CreateOrderRepositorySpy()
+  createOrderRepositorySpy.order = {
+    _id: 'valid_order_id'
+  }
+
+  return createOrderRepositorySpy
 }
 
 const makeCreateOrderRepositoryWithError = () => {
@@ -102,6 +109,13 @@ describe('Order Info Usecase', () => {
     expect(createOrderRepositorySpy.quantity).toBe('any_quantity')
     expect(createOrderRepositorySpy.orderStatus).toBe('any_order_status')
     expect(createOrderRepositorySpy.customerId).toBe('any_customer_id')
+  })
+
+  test('Should return a valid order id if correct values are provided', async () => {
+    const { sut, createOrderRepositorySpy } = makeSut()
+    const order = await sut.createOrder('any_payment_method', 'any_price', 'any_quantity', 'any_order_status', 'any_customer_id')
+    expect(order._id).toBe(createOrderRepositorySpy.order._id)
+    expect(order._id).toBeTruthy()
   })
 
   test('Should throw if invalid dependencies are provided', async () => {
