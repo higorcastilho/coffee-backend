@@ -83,9 +83,9 @@ describe('Order Info Usecase', () => {
 
   test('Should return a valid order id if correct values are provided', async () => {
     const { sut, createOrderRepositorySpy } = makeSut()
-    const order = await sut.createOrder('any_payment_method', 'any_price', 'any_quantity', 'any_order_status', 'any_customer_id')
-    expect(order._id).toBe(createOrderRepositorySpy.order._id)
-    expect(order._id).toBeTruthy()
+    const orderId = await sut.createOrder('any_payment_method', 'any_price', 'any_quantity', 'any_order_status', 'any_customer_id')
+    expect(orderId).toBe(createOrderRepositorySpy.order._id)
+    expect(orderId).toBeTruthy()
   })
 
   test('Should throw if invalid dependencies are provided', async () => {

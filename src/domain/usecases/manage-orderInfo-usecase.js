@@ -27,6 +27,6 @@ module.exports = class ManageOrderInfoUseCase {
     }
 
     const order = await this.createOrderRepository.create(paymentMethod, price, quantity, orderStatus, customerId)
-    return order
+    return order._id
   }
 }
