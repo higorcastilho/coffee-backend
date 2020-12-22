@@ -26,9 +26,22 @@ class ManageOrderInfoUseCase {
       throw new MissingParamError('customer id')
     }
 
-    const order = await this.createOrderRepository.create(paymentMethod, price, quantity, orderStatus, customerId)
-    return order
+    await this.createOrderRepository.create(paymentMethod, price, quantity, orderStatus, customerId)
   }
+}
+
+const makeCreateOrderRepository = () => {
+  class CreateOrderRepositorySpy {
+    async create (paymentMethod, price, quantity, orderStatus, customerId) {
+      this.paymentMethod = paymentMethod
+      this.price = price
+      this.quantity = quantity
+      this.orderStatus = orderStatus
+      this.customerId = customerId
+    }
+  }
+
+  return new CreateOrderRepositorySpy()
 }
 
 const makeCreateOrderRepositoryWithError = () => {
@@ -42,8 +55,10 @@ const makeCreateOrderRepositoryWithError = () => {
 }
 
 const makeSut = () => {
-  const sut = new ManageOrderInfoUseCase()
+  const createOrderRepositorySpy = makeCreateOrderRepository()
+  const sut = new ManageOrderInfoUseCase(createOrderRepositorySpy)
   return {
+    createOrderRepositorySpy,
     sut
   }
 }
@@ -77,6 +92,16 @@ describe('Order Info Usecase', () => {
     const { sut } = makeSut()
     const promise = sut.createOrder('any_payment_method', 'any_price', 'any_quantity', 'any_order_status')
     expect(promise).rejects.toThrow(new MissingParamError('customer id'))
+  })
+
+  test('Should call CreateOrderRepository with correct values', async () => {
+    const { sut, createOrderRepositorySpy } = makeSut()
+    await sut.createOrder('any_payment_method', 'any_price', 'any_quantity', 'any_order_status', 'any_customer_id')
+    expect(createOrderRepositorySpy.paymentMethod).toBe('any_payment_method')
+    expect(createOrderRepositorySpy.price).toBe('any_price')
+    expect(createOrderRepositorySpy.quantity).toBe('any_quantity')
+    expect(createOrderRepositorySpy.orderStatus).toBe('any_order_status')
+    expect(createOrderRepositorySpy.customerId).toBe('any_customer_id')
   })
 
   test('Should throw if invalid dependencies are provided', async () => {
