@@ -24,7 +24,7 @@ describe('Login Routes', () => {
       password: bcrypt.hashSync('hashed_password', 10)
     })
     await request(app)
-      .post('/api/v1/login')
+      .post('/api/v2/login')
       .send({
         email: 'valid_email@mail.com',
         password: 'hashed_password'
@@ -34,7 +34,7 @@ describe('Login Routes', () => {
 
   test('Should return 500 when invalid credentials are provided', async () => {
     await request(app)
-      .post('/api/v1/login')
+      .post('/api/v2/login')
       .send({
         email: 'valid_email@mail.com',
         password: 'hashed_password'
