@@ -14,7 +14,8 @@ class ShowOrdersUseCase {
       throw new MissingParamError('offset')
     }
 
-    await this.showOrdersRepository.show(limit, offset)
+    const orders = await this.showOrdersRepository.show(limit, offset)
+    return orders
   }
 }
 
@@ -23,6 +24,7 @@ const makeShowOrdersRepository = () => {
     async show (limit, offset) {
       this.limit = limit
       this.offset = offset
+      return this.orders
     }
   }
 
@@ -41,6 +43,7 @@ const makeShowOrdersRepositoryWithError = () => {
 
 const makeSut = () => {
   const showOrdersRepositorySpy = makeShowOrdersRepository()
+  showOrdersRepositorySpy.orders = [{ valid_order: 'any_order_info' }]
   const sut = new ShowOrdersUseCase(showOrdersRepositorySpy)
   return {
     showOrdersRepositorySpy,
@@ -66,6 +69,12 @@ describe('Show Orders Usecase', () => {
     await sut.show('any_limit', 'any_offset')
     expect(showOrdersRepositorySpy.limit).toBe('any_limit')
     expect(showOrdersRepositorySpy.offset).toBe('any_offset')
+  })
+
+  test('Should return a order if correct limit and offset are provided', async () => {
+    const { sut, showOrdersRepositorySpy } = makeSut()
+    const orders = await sut.show('any_limit', 'any_offset')
+    expect(orders).toEqual(showOrdersRepositorySpy.orders)
   })
 
   test('Should throw if invalid dependecies are provided', async () => {
