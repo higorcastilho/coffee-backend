@@ -72,6 +72,14 @@ describe('Show Orders Repository', () => {
     expect(promise).rejects.toThrow(new MissingParamError('offset'))
   })
 
+  test('Should return a empty array if no orders are found', async () => {
+    const { sut } = makeSut()
+    const limit = 10
+    const offset = 1
+    const orders = await sut.show(limit, offset)
+    expect(orders).toEqual([])
+  })
+
   test('Should orders if orders are found', async () => {
   	const { sut } = makeSut()
   	const limit = 10
