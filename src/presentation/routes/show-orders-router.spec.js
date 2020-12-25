@@ -36,6 +36,16 @@ const makeShowOrdersUseCase = () => {
   return new ShowOrdersUseCaseSpy()
 }
 
+const makeShowOrdersUseCaseWithError = () => {
+  class ShowOrdersUseCaseSpy {
+    async show () {
+      throw new Error()
+    }
+  }
+
+  return new ShowOrdersUseCaseSpy()
+}
+
 const makeSut = () => {
   const showOrdersUseCaseSpy = makeShowOrdersUseCase()
   const sut = new ShowOrdersRouter(showOrdersUseCaseSpy)
@@ -102,6 +112,25 @@ describe('Show Orders Router', () => {
     const suts = [].concat(
       new ShowOrdersRouter(),
       new ShowOrdersRouter({})
+    )
+
+    for (const sut of suts) {
+      const httpRequest = {
+        query: {
+          limit: 'any_limit',
+          offset: 'any_offset'
+        }
+      }
+      const httpResponse = await sut.route(httpRequest)
+      expect(httpResponse.statusCode).toBe(500)
+      expect(httpResponse.body.error).toBe(new ServerError().message)
+    }
+  })
+
+  test('Should throw if any dependency throws', async () => {
+    const showOrdersUseCaseWithError = makeShowOrdersUseCaseWithError()
+    const suts = [].concat(
+      new ShowOrdersRouter(showOrdersUseCaseWithError)
     )
 
     for (const sut of suts) {
