@@ -2,31 +2,50 @@ const HttpResponse = require('../helpers/http-response')
 const { ServerError } = require('../errors')
 const { MissingParamError } = require('../../utils/errors')
 
-describe('Show Orders Router', () => {
-  class ShowOrdersRouter {
-    async route (httpRequest) {
-      try {
-        const { limit, offset } = httpRequest.query
-        if (!limit) {
-          return HttpResponse.badRequest(new MissingParamError('limit'))
-        }
+class ShowOrdersRouter {
+  constructor (showOrdersUseCase) {
+    this.showOrdersUseCase = showOrdersUseCase
+  }
 
-        if (!offset) {
-          return HttpResponse.badRequest(new MissingParamError('offset'))
-        }
-      } catch (error) {
-        return HttpResponse.serverError()
+  async route (httpRequest) {
+    try {
+      const { limit, offset } = httpRequest.query
+      if (!limit) {
+        return HttpResponse.badRequest(new MissingParamError('limit'))
       }
+
+      if (!offset) {
+        return HttpResponse.badRequest(new MissingParamError('offset'))
+      }
+
+      await this.showOrdersUseCase.show(limit, offset)
+    } catch (error) {
+      return HttpResponse.serverError()
+    }
+  }
+}
+
+const makeShowOrdersUseCase = () => {
+  class ShowOrdersUseCaseSpy {
+    async show (limit, offset) {
+      this.limit = limit
+      this.offset = offset
     }
   }
 
-  const makeSut = () => {
-    const sut = new ShowOrdersRouter()
-    return {
-      sut
-    }
-  }
+  return new ShowOrdersUseCaseSpy()
+}
 
+const makeSut = () => {
+  const showOrdersUseCaseSpy = makeShowOrdersUseCase()
+  const sut = new ShowOrdersRouter(showOrdersUseCaseSpy)
+  return {
+    showOrdersUseCaseSpy,
+    sut
+  }
+}
+
+describe('Show Orders Router', () => {
   test('Should return 400 if no limit is provided', async () => {
     const { sut } = makeSut()
     const httpRequest = {
@@ -64,5 +83,18 @@ describe('Show Orders Router', () => {
     const httpResponse = await sut.route(httpRequest)
     expect(httpResponse.statusCode).toBe(500)
     expect(httpResponse.body.error).toBe(new ServerError().message)
+  })
+
+  test('Shoul call ShowOrdersUseCase with correct values', async () => {
+    const { sut, showOrdersUseCaseSpy } = makeSut()
+    const httpRequest = {
+      query: {
+        limit: 'any_limit',
+        offset: 'any_offset'
+      }
+    }
+    await sut.route(httpRequest)
+    expect(showOrdersUseCaseSpy.limit).toBe(httpRequest.query.limit)
+    expect(showOrdersUseCaseSpy.offset).toBe(httpRequest.query.offset)
   })
 })
