@@ -57,4 +57,16 @@ describe('Show Orders Usecase', () => {
     expect(showOrdersRepositorySpy.limit).toBe('any_limit')
     expect(showOrdersRepositorySpy.offset).toBe('any_offset')
   })
+
+  test('Should throw if invalid dependecies are provided', async () => {
+    const suts = [].concat(
+      new ShowOrdersUseCase(),
+      new ShowOrdersUseCase({})
+    )
+
+    for (const sut of suts) {
+      const promise = sut.show('any_limit', 'any_offset')
+      expect(promise).rejects.toThrow()
+    }
+  })
 })
