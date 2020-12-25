@@ -29,6 +29,16 @@ const makeShowOrdersRepository = () => {
   return new ShowOrdersRepositorySpy()
 }
 
+const makeShowOrdersRepositoryWithError = () => {
+  class ShowOrdersRepositorySpy {
+    async show () {
+      throw new Error()
+    }
+  }
+
+  return new ShowOrdersRepositorySpy()
+}
+
 const makeSut = () => {
   const showOrdersRepositorySpy = makeShowOrdersRepository()
   const sut = new ShowOrdersUseCase(showOrdersRepositorySpy)
@@ -62,6 +72,18 @@ describe('Show Orders Usecase', () => {
     const suts = [].concat(
       new ShowOrdersUseCase(),
       new ShowOrdersUseCase({})
+    )
+
+    for (const sut of suts) {
+      const promise = sut.show('any_limit', 'any_offset')
+      expect(promise).rejects.toThrow()
+    }
+  })
+
+  test('Should throw if any dependency throws', async () => {
+    const showOrdersRepositoryWithError = makeShowOrdersRepositoryWithError()
+    const suts = [].concat(
+      new ShowOrdersUseCase(showOrdersRepositoryWithError)
     )
 
     for (const sut of suts) {
