@@ -1,40 +1,10 @@
 /* eslint-disable */
-
 const { MissingParamError } = require('../../utils/errors')
 const MongoHelper = require('../helpers/mongo-helper')
+const ShowOrdersRepository = require('./show-orders-repository')
 
 let ordersModel
 let customerModel
-
-class ShowOrdersRepository {
-  async show (limit, offset) {
-    if (!limit) {
-      throw new MissingParamError('limit')
-    }
-
-    if (!offset) {
-      throw new MissingParamError('offset')
-    }
-
-    const ordersModel = await MongoHelper.getCollection('orders')
-    
-    const orders = await ordersModel
-      .aggregate([
-      	{ $limit: limit },
-      	{ $skip: (offset - 1) * limit},
-        { $lookup: {
-          from: "users",
-          localField: "customerId",
-          foreignField: "_id",
-          as: "customer"
-        }}
-
-      ])
-      .toArray()
-
-    return orders
-  }
-}
 
 const makeSut = () => {
   const sut = new ShowOrdersRepository()
@@ -72,7 +42,7 @@ describe('Show Orders Repository', () => {
     expect(promise).rejects.toThrow(new MissingParamError('offset'))
   })
 
-  test('Should return a empty array if no orders are found', async () => {
+  test('Should return an empty array if no orders are found', async () => {
     const { sut } = makeSut()
     const limit = 10
     const offset = 1
