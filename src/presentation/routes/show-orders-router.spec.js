@@ -78,8 +78,8 @@ describe('Show Orders Router', () => {
     const { sut, showOrdersUseCaseSpy } = makeSut()
     const httpRequest = {
       query: {
-        limit: 'any_limit',
-        offset: 'any_offset'
+        limit: 10,
+        offset: 1
       }
     }
     await sut.route(httpRequest)

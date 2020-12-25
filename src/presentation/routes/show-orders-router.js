@@ -9,6 +9,7 @@ module.exports = class ShowOrdersRouter {
   async route (httpRequest) {
     try {
       const { limit, offset } = httpRequest.query
+
       if (!limit) {
         return HttpResponse.badRequest(new MissingParamError('limit'))
       }
@@ -17,7 +18,7 @@ module.exports = class ShowOrdersRouter {
         return HttpResponse.badRequest(new MissingParamError('offset'))
       }
 
-      const orders = await this.showOrdersUseCase.show(limit, offset)
+      const orders = await this.showOrdersUseCase.show(Number(limit), Number(offset))
 
       return HttpResponse.ok({ orders })
     } catch (error) {
