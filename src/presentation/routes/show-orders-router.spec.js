@@ -1,35 +1,13 @@
-const HttpResponse = require('../helpers/http-response')
 const { ServerError } = require('../errors')
 const { MissingParamError } = require('../../utils/errors')
-
-class ShowOrdersRouter {
-  constructor (showOrdersUseCase) {
-    this.showOrdersUseCase = showOrdersUseCase
-  }
-
-  async route (httpRequest) {
-    try {
-      const { limit, offset } = httpRequest.query
-      if (!limit) {
-        return HttpResponse.badRequest(new MissingParamError('limit'))
-      }
-
-      if (!offset) {
-        return HttpResponse.badRequest(new MissingParamError('offset'))
-      }
-
-      await this.showOrdersUseCase.show(limit, offset)
-    } catch (error) {
-      return HttpResponse.serverError()
-    }
-  }
-}
+const ShowOrdersRouter = require('./show-orders-router')
 
 const makeShowOrdersUseCase = () => {
   class ShowOrdersUseCaseSpy {
     async show (limit, offset) {
       this.limit = limit
       this.offset = offset
+      return this.orders
     }
   }
 
@@ -48,6 +26,7 @@ const makeShowOrdersUseCaseWithError = () => {
 
 const makeSut = () => {
   const showOrdersUseCaseSpy = makeShowOrdersUseCase()
+  showOrdersUseCaseSpy.orders = [{ valid_order: 'any_order_info' }]
   const sut = new ShowOrdersRouter(showOrdersUseCaseSpy)
   return {
     showOrdersUseCaseSpy,
@@ -106,6 +85,19 @@ describe('Show Orders Router', () => {
     await sut.route(httpRequest)
     expect(showOrdersUseCaseSpy.limit).toBe(httpRequest.query.limit)
     expect(showOrdersUseCaseSpy.offset).toBe(httpRequest.query.offset)
+  })
+
+  test('Should return 200 if correct limit and offset are provided', async () => {
+    const { sut, showOrdersUseCaseSpy } = makeSut()
+    const httpRequest = {
+      query: {
+        limit: 'any_limit',
+        offset: 'any_offset'
+      }
+    }
+    const httpResponse = await sut.route(httpRequest)
+    expect(httpResponse.statusCode).toBe(200)
+    expect(httpResponse.body.orders).toEqual(showOrdersUseCaseSpy.orders)
   })
 
   test('Should throw if invalid dependencies are provided', async () => {
