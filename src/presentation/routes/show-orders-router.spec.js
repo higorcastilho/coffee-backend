@@ -97,4 +97,23 @@ describe('Show Orders Router', () => {
     expect(showOrdersUseCaseSpy.limit).toBe(httpRequest.query.limit)
     expect(showOrdersUseCaseSpy.offset).toBe(httpRequest.query.offset)
   })
+
+  test('Should throw if invalid dependencies are provided', async () => {
+    const suts = [].concat(
+      new ShowOrdersRouter(),
+      new ShowOrdersRouter({})
+    )
+
+    for (const sut of suts) {
+      const httpRequest = {
+        query: {
+          limit: 'any_limit',
+          offset: 'any_offset'
+        }
+      }
+      const httpResponse = await sut.route(httpRequest)
+      expect(httpResponse.statusCode).toBe(500)
+      expect(httpResponse.body.error).toBe(new ServerError().message)
+    }
+  })
 })
