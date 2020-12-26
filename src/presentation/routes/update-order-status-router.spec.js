@@ -1,35 +1,6 @@
-const HttpResponse = require('../helpers/http-response')
 const { ServerError } = require('../errors')
 const { MissingParamError } = require('../../utils/errors')
-
-class UpdateOrderStatusRouter {
-  constructor (updateOrderStatusUseCase) {
-    this.updateOrderStatusUseCase = updateOrderStatusUseCase
-  }
-
-  async route (httpRequest) {
-    try {
-      const { success, canceled, orderId } = httpRequest.body
-      if (!success) {
-        return HttpResponse.badRequest(new MissingParamError('success'))
-      }
-
-      if (!canceled) {
-        return HttpResponse.badRequest(new MissingParamError('canceled'))
-      }
-
-      if (!orderId) {
-        return HttpResponse.badRequest(new MissingParamError('orderId'))
-      }
-
-      const response = await this.updateOrderStatusUseCase.update(success, canceled, orderId)
-      // returns a empty object if updated successfully
-      return HttpResponse.ok(response)
-    } catch (error) {
-      return HttpResponse.serverError()
-    }
-  }
-}
+const UpdateOrderStatusRouter = require('./update-order-status-router')
 
 const makeUpdateOrderStatusUseCase = () => {
   class UpdateOrderStatusUseCaseSpy {
