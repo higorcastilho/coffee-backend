@@ -65,7 +65,8 @@ describe('Create Order Repository', () => {
       price: 'any_price',
       quantity: 'any_quantity',
       orderStatus: 'any_order_status',
-      customerId: 'any_customer_id'
+      customerId: 'any_customer_id',
+      createdAt: order.createdAt
     })
   })
 })

@@ -29,7 +29,8 @@ module.exports = class CreateOrderRepository {
       price,
       quantity,
       orderStatus,
-      customerId
+      customerId,
+      createdAt: new Date()
     })
 
     return order.ops[0]
