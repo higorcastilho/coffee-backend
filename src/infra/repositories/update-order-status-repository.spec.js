@@ -1,7 +1,7 @@
 const MongoHelper = require('../helpers/mongo-helper')
 const { MissingParamError } = require('../../utils/errors')
 
-let orderModel
+let orderModel, fakeOrderId
 
 class UpdateOrderStatusRepository {
   async update (orderStatus, orderId) {
@@ -12,6 +12,18 @@ class UpdateOrderStatusRepository {
     if (!orderId) {
       throw new MissingParamError('orderId')
     }
+
+    const orderModel = await MongoHelper.getCollection('orders')
+    await orderModel
+      .updateOne({
+        _id: orderId
+      }, {
+        $set: {
+          orderStatus
+        }
+      })
+
+    return {}
   }
 }
 
@@ -30,6 +42,16 @@ describe('Update Order Status Repository', () => {
 
   beforeEach(async () => {
     await orderModel.deleteMany()
+    const fakeOrder = await orderModel.insertOne({
+      paymentMethod: 'any_payment_method',
+      price: 'any_price',
+      quantity: 'any_quantity',
+      orderStatus: 'any_orderStatus',
+      createdAt: new Date(),
+      customerId: 1
+    })
+
+    fakeOrderId = fakeOrder.ops[0]._id
   })
 
   afterAll(async () => {
@@ -44,7 +66,15 @@ describe('Update Order Status Repository', () => {
 
   test('Should throw if no orderId is provided', async () => {
     const { sut } = makeSut()
-    const promise = sut.update()
+    const promise = sut.update('any_order_status')
     expect(promise).rejects.toThrow(new MissingParamError('orderId'))
+  })
+
+  test('Should return an empty object if order is correctly updated', async () => {
+    const { sut } = makeSut()
+    const response = await sut.update(10, fakeOrderId)
+    const updatedFakeOrder = await orderModel.findOne({ _id: fakeOrderId })
+    expect(response).toEqual({})
+    expect(updatedFakeOrder.orderStatus).toBe(10)
   })
 })
