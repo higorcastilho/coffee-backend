@@ -51,4 +51,17 @@ describe('Update Order Status Router', () => {
     expect(httpResponse.statusCode).toBe(400)
     expect(httpResponse.body.error).toBe(new MissingParamError('canceled').message)
   })
+
+  test('Should return 400 if no orderId param is provided', async () => {
+    const { sut } = makeSut()
+    const httpRequest = {
+      body: {
+        success: 'any_boolean',
+        canceled: '!any_boolean'
+      }
+    }
+    const httpResponse = await sut.route(httpRequest)
+    expect(httpResponse.statusCode).toBe(400)
+    expect(httpResponse.body.error).toBe(new MissingParamError('orderId').message)
+  })
 })
