@@ -44,11 +44,23 @@ const makeUpdateOrderStatusUseCase = () => {
   return new UpdateOrderStatusUseCaseSpy()
 }
 
+const makeUpdateOrderStatusUseCaseWithError = () => {
+  class UpdateOrderStatusUseCaseSpyWithError {
+    async update () {
+      throw new Error()
+    }
+  }
+
+  return new UpdateOrderStatusUseCaseSpyWithError()
+}
+
 const makeSut = () => {
+  const updateOrderStatusUseCaseSpyWithError = makeUpdateOrderStatusUseCaseWithError
   const updateOrderStatusUseCaseSpy = makeUpdateOrderStatusUseCase()
   updateOrderStatusUseCaseSpy.response = {}
   const sut = new UpdateOrderStatusRouter(updateOrderStatusUseCaseSpy)
   return {
+    updateOrderStatusUseCaseSpyWithError,
     updateOrderStatusUseCaseSpy,
     sut
   }
@@ -124,6 +136,27 @@ describe('Update Order Status Router', () => {
     const suts = [].concat(
       new UpdateOrderStatusRouter(),
       new UpdateOrderStatusRouter({})
+    )
+
+    for (const sut of suts) {
+      const httpRequest = {
+        body: {
+          success: 'any_boolean',
+          canceled: '!any_boolean',
+          orderId: 'any_order_id'
+        }
+      }
+
+      const httpResponse = await sut.route(httpRequest)
+      expect(httpResponse.statusCode).toBe(500)
+      expect(httpResponse.body.error).toBe(new ServerError().message)
+    }
+  })
+
+  test('Should return 500 if any dependecy throws', async () => {
+    const updateOrderStatusUseCaseSpyWithError = makeUpdateOrderStatusUseCaseWithError()
+    const suts = [].concat(
+      new UpdateOrderStatusRouter(updateOrderStatusUseCaseSpyWithError)
     )
 
     for (const sut of suts) {
