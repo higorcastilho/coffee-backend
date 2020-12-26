@@ -24,7 +24,8 @@ module.exports = class ShowOrdersRepository {
             foreignField: '_id',
             as: 'customer'
           }
-        }
+        },
+        { $sort: { createdAt: -1 } }
 
       ])
       .toArray()
