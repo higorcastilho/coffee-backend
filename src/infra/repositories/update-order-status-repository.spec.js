@@ -8,6 +8,10 @@ class UpdateOrderStatusRepository {
     if (!orderStatus) {
       throw new MissingParamError('orderStatus')
     }
+
+    if (!orderId) {
+      throw new MissingParamError('orderId')
+    }
   }
 }
 
@@ -36,5 +40,11 @@ describe('Update Order Status Repository', () => {
     const { sut } = makeSut()
     const promise = sut.update()
     expect(promise).rejects.toThrow(new MissingParamError('orderStatus'))
+  })
+
+  test('Should throw if no orderId is provided', async () => {
+    const { sut } = makeSut()
+    const promise = sut.update()
+    expect(promise).rejects.toThrow(new MissingParamError('orderId'))
   })
 })
