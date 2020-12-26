@@ -21,7 +21,9 @@ class UpdateOrderStatusRouter {
         return HttpResponse.badRequest(new MissingParamError('orderId'))
       }
 
-      await this.updateOrderStatusUseCase.update(success, canceled, orderId)
+      const response = await this.updateOrderStatusUseCase.update(success, canceled, orderId)
+      // returns a empty object if updated successfully
+      return HttpResponse.ok(response)
     } catch (error) {
       return false
     }
@@ -34,6 +36,7 @@ const makeUpdateOrderStatusUseCase = () => {
       this.success = success
       this.canceled = canceled
       this.orderId = orderId
+      return this.response
     }
   }
 
@@ -42,6 +45,7 @@ const makeUpdateOrderStatusUseCase = () => {
 
 const makeSut = () => {
   const updateOrderStatusUseCaseSpy = makeUpdateOrderStatusUseCase()
+  updateOrderStatusUseCaseSpy.response = {}
   const sut = new UpdateOrderStatusRouter(updateOrderStatusUseCaseSpy)
   return {
     updateOrderStatusUseCaseSpy,
@@ -98,5 +102,20 @@ describe('Update Order Status Router', () => {
     expect(updateOrderStatusUseCaseSpy.success).toBe(httpRequest.body.success)
     expect(updateOrderStatusUseCaseSpy.canceled).toBe(httpRequest.body.canceled)
     expect(updateOrderStatusUseCaseSpy.orderId).toBe(httpRequest.body.orderId)
+  })
+
+  test('Should return 200 if correct values are provided', async () => {
+    const { sut } = makeSut()
+    const httpRequest = {
+      body: {
+        success: 'any_boolean',
+        canceled: '!any_boolean',
+        orderId: 'any_order_id'
+      }
+    }
+
+    const httpResponse = await sut.route(httpRequest)
+    expect(httpResponse.statusCode).toBe(200)
+    expect(httpResponse.body).toEqual({})
   })
 })
