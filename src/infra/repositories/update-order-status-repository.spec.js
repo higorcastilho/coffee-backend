@@ -1,31 +1,8 @@
 const MongoHelper = require('../helpers/mongo-helper')
 const { MissingParamError } = require('../../utils/errors')
+const UpdateOrderStatusRepository = require('./update-order-status-repository')
 
 let orderModel, fakeOrderId
-
-class UpdateOrderStatusRepository {
-  async update (orderStatus, orderId) {
-    if (!orderStatus) {
-      throw new MissingParamError('orderStatus')
-    }
-
-    if (!orderId) {
-      throw new MissingParamError('orderId')
-    }
-
-    const orderModel = await MongoHelper.getCollection('orders')
-    await orderModel
-      .updateOne({
-        _id: orderId
-      }, {
-        $set: {
-          orderStatus
-        }
-      })
-
-    return {}
-  }
-}
 
 const makeSut = () => {
   const sut = new UpdateOrderStatusRepository()
