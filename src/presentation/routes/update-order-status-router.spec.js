@@ -5,8 +5,17 @@ class UpdateOrderStatusRouter {
   async route (httpRequest) {
     try {
       const { success, canceled, orderId } = httpRequest.body
-      console.log(success, canceled, orderId)
-      return HttpResponse.badRequest(new MissingParamError('success'))
+      if (!success) {
+        return HttpResponse.badRequest(new MissingParamError('success'))
+      }
+
+      if (!canceled) {
+        return HttpResponse.badRequest(new MissingParamError('canceled'))
+      }
+
+      if (!orderId) {
+        return HttpResponse.badRequest(new MissingParamError('orderId'))
+      }
     } catch (error) {
       return false
     }
@@ -29,5 +38,17 @@ describe('Update Order Status Router', () => {
     const httpResponse = await sut.route(httpRequest)
     expect(httpResponse.statusCode).toBe(400)
     expect(httpResponse.body.error).toBe(new MissingParamError('success').message)
+  })
+
+  test('Should return 400 if no canceled param is provided', async () => {
+    const { sut } = makeSut()
+    const httpRequest = {
+      body: {
+        success: 'any_boolean'
+      }
+    }
+    const httpResponse = await sut.route(httpRequest)
+    expect(httpResponse.statusCode).toBe(400)
+    expect(httpResponse.body.error).toBe(new MissingParamError('canceled').message)
   })
 })
