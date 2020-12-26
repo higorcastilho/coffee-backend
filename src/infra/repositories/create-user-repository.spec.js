@@ -64,7 +64,8 @@ describe('Create User Repository', () => {
       email: 'unregistered_email',
       phone: 'any_phone',
       address: 'any_address',
-      zip: 'any_zip'
+      zip: 'any_zip',
+      createdAt: customer.ops[0].createdAt
     })
   })
 })

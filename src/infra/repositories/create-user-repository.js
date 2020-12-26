@@ -29,7 +29,8 @@ module.exports = class CreateUserRepository {
       email,
       phone,
       address,
-      zip
+      zip,
+      createdAt: new Date()
     })
 
     return user
