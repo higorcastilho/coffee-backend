@@ -1,4 +1,5 @@
 const HttpResponse = require('../helpers/http-response')
+const { ServerError } = require('../errors')
 const { MissingParamError } = require('../../utils/errors')
 
 class UpdateOrderStatusRouter {
@@ -25,7 +26,7 @@ class UpdateOrderStatusRouter {
       // returns a empty object if updated successfully
       return HttpResponse.ok(response)
     } catch (error) {
-      return false
+      return HttpResponse.serverError()
     }
   }
 }
@@ -117,5 +118,26 @@ describe('Update Order Status Router', () => {
     const httpResponse = await sut.route(httpRequest)
     expect(httpResponse.statusCode).toBe(200)
     expect(httpResponse.body).toEqual({})
+  })
+
+  test('Should return 500 if invalid dependecies are provided', async () => {
+    const suts = [].concat(
+      new UpdateOrderStatusRouter(),
+      new UpdateOrderStatusRouter({})
+    )
+
+    for (const sut of suts) {
+      const httpRequest = {
+        body: {
+          success: 'any_boolean',
+          canceled: '!any_boolean',
+          orderId: 'any_order_id'
+        }
+      }
+
+      const httpResponse = await sut.route(httpRequest)
+      expect(httpResponse.statusCode).toBe(500)
+      expect(httpResponse.body.error).toBe(new ServerError().message)
+    }
   })
 })
