@@ -22,7 +22,7 @@ module.exports = class UpdateOrderStatusRouter {
       }
 
       const response = await this.updateOrderStatusUseCase.update(success, canceled, orderId)
-      // returns a empty object if updated successfully
+      // returns an empty object if updated successfully
       return HttpResponse.ok(response)
     } catch (error) {
       return HttpResponse.serverError()
