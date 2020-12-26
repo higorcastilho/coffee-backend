@@ -96,6 +96,18 @@ describe('Update Order Status UseCase', () => {
     expect(response).toEqual({})
   })
 
+  test('Should throw if invalid dependecies are provided', async () => {
+    const suts = [].concat(
+      new UpdateOrderStatusUseCase(),
+      new UpdateOrderStatusUseCase({})
+    )
+
+    for (const sut of suts) {
+      const promise = sut.update('any_boolean', '!any_boolean', 'any_order_id')
+      expect(promise).rejects.toThrow()
+    }
+  })
+
   test('Should throw if any dependency throws', async () => {
     const updateOrderStatusRepositorySpyWithError = makeUpdateOrderStatusRepositoryWithError()
     const suts = [].concat(
