@@ -2,6 +2,10 @@ const HttpResponse = require('../helpers/http-response')
 const { MissingParamError } = require('../../utils/errors')
 
 class UpdateOrderStatusRouter {
+  constructor (updateOrderStatusUseCase) {
+    this.updateOrderStatusUseCase = updateOrderStatusUseCase
+  }
+
   async route (httpRequest) {
     try {
       const { success, canceled, orderId } = httpRequest.body
@@ -16,15 +20,31 @@ class UpdateOrderStatusRouter {
       if (!orderId) {
         return HttpResponse.badRequest(new MissingParamError('orderId'))
       }
+
+      await this.updateOrderStatusUseCase.update(success, canceled, orderId)
     } catch (error) {
       return false
     }
   }
 }
 
+const makeUpdateOrderStatusUseCase = () => {
+  class UpdateOrderStatusUseCaseSpy {
+    async update (success, canceled, orderId) {
+      this.success = success
+      this.canceled = canceled
+      this.orderId = orderId
+    }
+  }
+
+  return new UpdateOrderStatusUseCaseSpy()
+}
+
 const makeSut = () => {
-  const sut = new UpdateOrderStatusRouter()
+  const updateOrderStatusUseCaseSpy = makeUpdateOrderStatusUseCase()
+  const sut = new UpdateOrderStatusRouter(updateOrderStatusUseCaseSpy)
   return {
+    updateOrderStatusUseCaseSpy,
     sut
   }
 }
@@ -63,5 +83,20 @@ describe('Update Order Status Router', () => {
     const httpResponse = await sut.route(httpRequest)
     expect(httpResponse.statusCode).toBe(400)
     expect(httpResponse.body.error).toBe(new MissingParamError('orderId').message)
+  })
+
+  test('Should call UpdateOrderStatusUseCase with correct values', async () => {
+    const { sut, updateOrderStatusUseCaseSpy } = makeSut()
+    const httpRequest = {
+      body: {
+        success: 'any_boolean',
+        canceled: '!any_boolean',
+        orderId: 'any_order_id'
+      }
+    }
+    await sut.route(httpRequest)
+    expect(updateOrderStatusUseCaseSpy.success).toBe(httpRequest.body.success)
+    expect(updateOrderStatusUseCaseSpy.canceled).toBe(httpRequest.body.canceled)
+    expect(updateOrderStatusUseCaseSpy.orderId).toBe(httpRequest.body.orderId)
   })
 })
