@@ -29,4 +29,10 @@ describe('Update Order Status UseCase', () => {
     const promise = sut.update()
     expect(promise).rejects.toThrow(new MissingParamError('success'))
   })
+
+  test('Should throw if no canceled param is provided', async () => {
+    const { sut } = makeSut()
+    const promise = sut.update('any_boolean')
+    expect(promise).rejects.toThrow(new MissingParamError('canceled'))
+  })
 })
