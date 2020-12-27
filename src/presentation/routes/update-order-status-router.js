@@ -9,6 +9,7 @@ module.exports = class UpdateOrderStatusRouter {
   async route (httpRequest) {
     try {
       const { success, canceled, orderId } = httpRequest.body
+
       if (!success) {
         return HttpResponse.badRequest(new MissingParamError('success'))
       }

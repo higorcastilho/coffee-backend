@@ -19,12 +19,12 @@ module.exports = class UpdateOrderStatusUseCase {
       throw new MissingParamError('orderId')
     }
 
-    if (success && !canceled) {
-      this.orderStatus = 1
+    if (success === 'true' && canceled === 'false') {
+      this.orderStatus = 'sim'
     }
 
-    if (!success && canceled) {
-      this.orderStatus = 0
+    if (success === 'false' && canceled === 'true') {
+      this.orderStatus = 'não'
     }
 
     const response = await this.updateOrderStatusRepository.update(this.orderStatus, orderId)

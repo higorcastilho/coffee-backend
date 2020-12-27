@@ -12,14 +12,10 @@ module.exports = class UpdateOrderStatusRepository {
     }
 
     const orderModel = await MongoHelper.getCollection('orders')
-    await orderModel
-      .updateOne({
-        _id: orderId
-      }, {
-        $set: {
-          orderStatus
-        }
-      })
+
+    const order = await orderModel.find(`{ _id: ${orderId}}`)
+    const orderArray = await order.toArray()
+    await orderModel.updateOne({ _id: orderArray[0]._id }, { $set: { orderStatus: orderStatus } })
 
     return {}
   }
