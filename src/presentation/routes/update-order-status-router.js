@@ -26,6 +26,7 @@ module.exports = class UpdateOrderStatusRouter {
       // returns an empty object if updated successfully
       return HttpResponse.ok(response)
     } catch (error) {
+      console.log(error)
       return HttpResponse.serverError()
     }
   }
