@@ -5,3 +5,5 @@ node_modules/
 coverage/
 
 src/main/config/env.js
+
+data/

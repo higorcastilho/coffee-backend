@@ -1,11 +1,17 @@
 version: '3.7'
 
 services:
+  app:
+    container_name: app
+    build: .
+    ports:
+      - "5858:5858"
+    depends_on:
+      - "mongo"
   mongo:
     image: mongo
-    restart: always
     container_name: mongo
     ports:
       - "27017:27017"
     volumes:
-      - /home/hc/Desenvolvimento/Docker/Volumes/MongoDB:/data/db
+      - ./data:/data/db
