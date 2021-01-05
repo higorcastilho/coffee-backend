@@ -31,7 +31,8 @@ module.exports = class ManageCustomerUsecase {
 
     if (!customer) {
       const customer = await this.createUserRepository.create(name, email, phone, address, zip)
-      return customer
+
+      return customer.ops[0]
     }
 
     return customer

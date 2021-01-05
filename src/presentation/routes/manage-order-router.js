@@ -25,6 +25,7 @@ module.exports = class ManageOrderRouter {
       }
 
       const customer = await this.manageCustomerUseCase.returnOrCreateCustomer(name, email, phone, address, zip)
+
       if (!customer) {
         return HttpResponse.serverError()
       }

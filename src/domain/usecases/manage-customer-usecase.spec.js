@@ -91,6 +91,9 @@ describe('Manage Customer Usecase ', () => {
 
   test('Should call LoadUserByEmailRepository with correct email', async () => {
     const { sut, loadUserByEmailRepositorySpy } = makeSut()
+    loadUserByEmailRepositorySpy.user = {
+      ops: [{ _id: 'valid_id' }]
+    }
     await sut.returnOrCreateCustomer('any_name', 'any_email', 'any_phone', 'any_address', 'any_zip')
     expect(loadUserByEmailRepositorySpy.email).toBe('any_email')
   })
@@ -106,6 +109,9 @@ describe('Manage Customer Usecase ', () => {
   test('Should call CreateUserRepository with correct values', async () => {
     const { sut, loadUserByEmailRepositorySpy, createUserRepositorySpy } = makeSut()
     loadUserByEmailRepositorySpy.user = null
+    createUserRepositorySpy.user = {
+      ops: [{ _id: 'valid_id' }]
+    }
     await sut.returnOrCreateCustomer('any_name', 'not_registered_email', 'any_phone', 'any_address', 'any_zip')
     expect(createUserRepositorySpy.name).toBe('any_name')
     expect(createUserRepositorySpy.email).toBe('not_registered_email')
@@ -117,9 +123,11 @@ describe('Manage Customer Usecase ', () => {
   test('Should create and return a customer if not registered e-mail is provided', async () => {
     const { sut, loadUserByEmailRepositorySpy, createUserRepositorySpy } = makeSut()
     loadUserByEmailRepositorySpy.user = null
-    createUserRepositorySpy.user = 'valid_user'
+    createUserRepositorySpy.user = {
+      ops: [{ _id: 'valid_id' }]
+    }
     const customerId = await sut.returnOrCreateCustomer('any_name', 'not_registered_email', 'any_phone', 'any_address', 'any_zip')
-    expect(customerId).toBe('valid_user')
+    expect(customerId).toEqual({ _id: 'valid_id' })
     expect(customerId).toBeTruthy()
   })
 

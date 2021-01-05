@@ -20,8 +20,8 @@ module.exports = class UpdateOrderStatusRepository {
         orderStatus
       }
     }
-    const result = await orderModel.updateOne(filter, updateDoc)
-    console.log(`${result.matchedCount} document(s) matched the filter, updated ${result.modifiedCount} document(s)`)
+    await orderModel.updateOne(filter, updateDoc)
+
     return {}
   }
 }
