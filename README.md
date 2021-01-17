@@ -1,5 +1,6 @@
-# coffee-backend
-
+<h1 align="center">
+Landing page API to manage purchases
+</h1>
 ### :gear: Running locally
 
 - Clone this repository, set up your stripe secret key (env.example.js has most of the settings already) inside src/main/config/env.js.
